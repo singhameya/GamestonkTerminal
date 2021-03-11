@@ -165,10 +165,12 @@ jobs:
           use-only-tar-bz2: true
 
       - name: Install poetry
-        run: conda install poetry
+        run: conda install --name testing poetry
 
       - name: Install dependencies
-        run: poetry install --no-interaction
+        run: |
+          conda activate testing
+          poetry install --no-interaction
 
       - name: List installed packages
         run: conda list
