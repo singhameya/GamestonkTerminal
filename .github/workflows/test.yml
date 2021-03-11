@@ -50,6 +50,12 @@ jobs:
           # Needed for caching
           use-only-tar-bz2: true
 
+      - name: Update Temp permissions on windows
+        if: runner.os == 'Windows'
+        shell: cmd /C CALL {0}
+        run: >-
+          c:\windows\system32\icacls C:\Users\runneradmin\AppData\Local\Temp /grant "everyone":(OI)(CI)M
+
       - name: Install dependencies (Bash)
         shell: bash -l {0}
         run: |

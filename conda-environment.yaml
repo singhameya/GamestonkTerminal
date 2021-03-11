@@ -3,7 +3,5 @@ channels:
 dependencies:
   - python
   - poetry
-  - pyrsistent=0.17.3
-  - traitlets=4.3.3
   - jupyter
   - pytest
