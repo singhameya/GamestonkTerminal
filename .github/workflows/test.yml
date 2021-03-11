@@ -60,7 +60,7 @@ jobs:
         shell: bash -l {0}
         run: |
           conda info
-          poetry install --no-interaction
+          pip install --user --requirement requirements.txt
 
       - name: List installed packages (Bash)
         shell: bash -l {0}
