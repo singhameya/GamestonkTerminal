@@ -76,11 +76,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["ubuntu"]
+        os: ["ubuntu", "windows"]
         python-version: ["3.8"]
         dependencies: [""]
         include:
           - os: ubuntu
+            python: 3.8
+          - os: windows
             python: 3.8
     env:
       OS: ${{ matrix.os }}
@@ -117,15 +119,30 @@ jobs:
           # Needed for caching
           use-only-tar-bz2: true
 
-      - name: Install poetry
-        run: conda install --name testing poetry
-
-      - name: Install dependencies
+      - name: Install dependencies (Bash)
         shell: bash -l {0}
         run: |
           conda info
           poetry install --no-interaction
 
-      - name: List installed packages
+      - name: Install dependencies (Powershell)
+        shell: powershell
+        run: |
+          conda info
+          poetry install --no-interaction
+
+      - name: List installed packages (Bash)
         shell: bash -l {0}
         run: conda list
+
+      - name: List installed packages (Powershell)
+        shell: powershell
+        run: conda list
+
+      - name: Run tests (Bash)
+        shell: bash -l {0}
+        run: pytest tests/
+
+      - name: Run tests (Powershell)
+        shell: powershell
+        run: pytest tests/
