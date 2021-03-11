@@ -112,6 +112,7 @@ jobs:
           auto-update-conda: true
           channels: conda-forge
           show-channel-urls: true
+          environment-file: conda-environment.yaml
           activate-environment: testing
           # Needed for caching
           use-only-tar-bz2: true
@@ -120,9 +121,11 @@ jobs:
         run: conda install --name testing poetry
 
       - name: Install dependencies
+        shell: bash -l {0}
         run: |
           conda info
           poetry install --no-interaction
 
       - name: List installed packages
+        shell: bash -l {0}
         run: conda list
