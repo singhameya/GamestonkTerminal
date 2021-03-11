@@ -125,24 +125,10 @@ jobs:
           conda info
           poetry install --no-interaction
 
-      - name: Install dependencies (Powershell)
-        shell: powershell
-        run: |
-          conda info
-          poetry install --no-interaction
-
       - name: List installed packages (Bash)
         shell: bash -l {0}
         run: conda list
 
-      - name: List installed packages (Powershell)
-        shell: powershell
-        run: conda list
-
       - name: Run tests (Bash)
         shell: bash -l {0}
-        run: pytest tests/
-
-      - name: Run tests (Powershell)
-        shell: powershell
         run: pytest tests/

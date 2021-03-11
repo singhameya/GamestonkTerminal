@@ -3,4 +3,5 @@ channels:
 dependencies:
   - python
   - poetry
+  - jupyter
   - pytest
