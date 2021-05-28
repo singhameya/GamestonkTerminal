@@ -7,6 +7,7 @@ import pandas as pd
 
 # IMPORTATION INTERNAL
 import gamestonk_terminal.models.technical_analysis as ta
+from gamestonk_terminal import config_terminal as cfg
 
 gst = None
 
@@ -21,6 +22,7 @@ def getGST():
 
 class GamestonkTerminal:
     def __init__(self):
+        self.cfg = cfg
         self.intrument = Instrument()
         self.ta = ta.TechnicalAnalysis(instrument=self.intrument)
         self.__df_stock = pd.DataFrame()
