@@ -2,6 +2,7 @@ import argparse
 import matplotlib.pyplot as plt
 import pandas_ta as ta
 from pandas.plotting import register_matplotlib_converters
+
 from gamestonk_terminal.helper_funcs import (
     check_positive,
     parse_known_args_and_warn,
@@ -9,6 +10,7 @@ from gamestonk_terminal.helper_funcs import (
 )
 from gamestonk_terminal.config_plot import PLOT_DPI
 from gamestonk_terminal import feature_flags as gtff
+from gamestonk_terminal.models import terminal
 
 register_matplotlib_converters()
 
@@ -53,53 +55,13 @@ def ema(l_args, s_ticker, s_interval, df_stock):
         if not ns_parser:
             return
 
-        # Daily
-        if s_interval == "1440min":
-            df_ta = ta.ema(
-                df_stock["5. adjusted close"],
-                length=ns_parser.n_length,
-                offset=ns_parser.n_offset,
-            ).dropna()
-
-        # Intraday
-        else:
-            df_ta = ta.ema(
-                df_stock["4. close"],
-                length=ns_parser.n_length,
-                offset=ns_parser.n_offset,
-            ).dropna()
-
-        _, _ = plt.subplots(figsize=plot_autoscale(), dpi=PLOT_DPI)
-        plt.title(f"{ns_parser.n_length} EMA on {s_ticker}")
-        if s_interval == "1440min":
-            plt.plot(
-                df_stock["5. adjusted close"].index,
-                df_stock["5. adjusted close"].values,
-                "k",
-                lw=3,
-            )
-            plt.xlim(
-                df_stock["5. adjusted close"].index[0],
-                df_stock["5. adjusted close"].index[-1],
-            )
-        else:
-            plt.plot(df_stock["4. close"].index, df_stock["4. close"].values, "k", lw=3)
-            plt.xlim(df_stock["4. close"].index[0], df_stock["4. close"].index[-1])
-        plt.xlabel("Time")
-        plt.ylabel(f"Share Price of {s_ticker} ($)")
-        plt.plot(df_ta.index, df_ta.values, c="tab:blue")
-        l_legend = list()
-        l_legend.append(s_ticker)
-        # Pandas series
-        if len(df_ta.shape) == 1:
-            l_legend.append(f"{ns_parser.n_length} EMA")
-        # Pandas dataframe
-        else:
-            l_legend.append(df_ta.columns.tolist())
-        plt.legend(l_legend)
-        plt.grid(b=True, which="major", color="#666666", linestyle="-")
-        plt.minorticks_on()
-        plt.grid(b=True, which="minor", color="#999999", linestyle="-", alpha=0.2)
+        plt = terminal.getTerminal().ta.ema(
+            s_ticker,
+            s_interval,
+            df_stock,
+            ns_parser.n_length,
+            ns_parser.n_offset,
+        )
 
         if gtff.USE_ION:
             plt.ion()
