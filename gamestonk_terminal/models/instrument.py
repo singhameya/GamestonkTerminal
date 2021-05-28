@@ -10,9 +10,9 @@ import pandas as pd
 class Instrument:
     def __init__(
         self,
-        ticker:str,
-        interval:int,
-        prepost:bool,
+        ticker:str=None,
+        interval:int=None,
+        prepost:bool=None,
         start:datetime=None,
         source:str=None,
     ) -> None:

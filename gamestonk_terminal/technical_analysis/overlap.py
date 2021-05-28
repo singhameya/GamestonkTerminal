@@ -58,7 +58,6 @@ def ema(l_args, s_ticker, s_interval, df_stock):
         plt = terminal.getTerminal().ta.ema(
             s_ticker,
             s_interval,
-            df_stock,
             ns_parser.n_length,
             ns_parser.n_offset,
         )

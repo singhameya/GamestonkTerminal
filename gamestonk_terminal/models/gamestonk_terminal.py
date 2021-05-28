@@ -1,5 +1,6 @@
 # IMPORTATION STANDARD
 from datetime import datetime
+from gamestonk_terminal.models.instrument import Instrument
 
 # IMPORTATION THIRDPARTY
 import pandas as pd
@@ -7,31 +8,28 @@ import pandas as pd
 # IMPORTATION INTERNAL
 import gamestonk_terminal.models.technical_analysis as ta
 
-tm = None
+gst = None
 
-def getTerminal():
-    global tm
+def getGST():
+    global gst
 
-    if tm is not None:
-        return tm
+    if gst is not None:
+        return gst
     else:
-        tm = Terminal()
-        return tm
+        gst = GamestonkTerminal()
+        return gst
 
-class Terminal:
+class GamestonkTerminal:
     def __init__(self):
-        self.ta = ta
+        self.intrument = Instrument()
+        self.ta = ta.TechnicalAnalysis(instrument=self.intrument)
         self.__df_stock = pd.DataFrame()
 
     def load(
         self,
-        ticker:str,
-        start:datetime,
-        interval:int,
-        source:str,
-        prepost:bool,
+        intrument:Instrument,
     ):
-        pass
+        self.intrument = intrument
 
     def clear(
         self,
