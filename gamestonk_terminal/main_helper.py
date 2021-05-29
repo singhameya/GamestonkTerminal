@@ -331,11 +331,18 @@ def load(l_args, s_ticker, s_start, s_interval, df_stock):
             f"with starting period {s_start.strftime('%Y-%m-%d')} for analysis.\n"
         )
 
+        # Import our model GST
+        from gamestonk_terminal.models import gamestonk_terminal as gst
+
+        # Instantiate and Load GST object with relevant information
+        gst = gst.GamestonkTerminal(type="stock", ticker=ns_parser.s_ticker.upper(), data=df_stock_candidate, interval=str(ns_parser.n_interval) + "min")
+
         return [
             ns_parser.s_ticker.upper(),
             s_start,
             str(ns_parser.n_interval) + "min",
             df_stock_candidate,
+            gst
         ]
 
     except Exception as e:

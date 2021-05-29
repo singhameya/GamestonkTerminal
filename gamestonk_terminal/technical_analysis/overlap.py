@@ -10,67 +10,71 @@ from gamestonk_terminal.helper_funcs import (
 )
 from gamestonk_terminal.config_plot import PLOT_DPI
 from gamestonk_terminal import feature_flags as gtff
-from gamestonk_terminal.models import terminal
 
 register_matplotlib_converters()
 
 
-def ema(l_args, s_ticker, s_interval, df_stock):
-    parser = argparse.ArgumentParser(
-        add_help=False,
-        prog="ema",
-        description="""
-            The Exponential Moving Average is a staple of technical
-            analysis and is used in countless technical indicators. In a Simple Moving
-            Average, each value in the time period carries equal weight, and values outside
-            of the time period are not included in the average. However, the Exponential
-            Moving Average is a cumulative calculation, including all data. Past values have
-            a diminishing contribution to the average, while more recent values have a greater
-            contribution. This method allows the moving average to be more responsive to changes
-            in the data.
-        """,
-    )
+def ema(df_stock, s_ticker, s_interval, n_length, n_offset):
+    #gst = gamestonk_terminal.getGST()
+    #gst.ta.ema(df_stock, n_length, n_offset)
 
-    parser.add_argument(
-        "-l",
-        "--length",
-        action="store",
-        dest="n_length",
-        type=check_positive,
-        default=20,
-        help="length",
-    )
-    parser.add_argument(
-        "-o",
-        "--offset",
-        action="store",
-        dest="n_offset",
-        type=check_positive,
-        default=0,
-        help="offset",
-    )
+    fig, ax = plt.subplots(figsize=plot_autoscale(), dpi=PLOT_DPI)
 
-    try:
-        ns_parser = parse_known_args_and_warn(parser, l_args)
-        if not ns_parser:
-            return
+    if s_interval == "1440min":
+        plt.plot(df_stock.index, df_stock["5. adjusted close"].values, color="k")
+    else:
+        plt.plot(df_stock.index, df_stock["4. close"].values, color="k")
+    l_legend = list()
+    l_legend.append(s_ticker)
+    for length in [n_length]:
+        if s_interval == "1440min":
+            # CALL HELPER DIRECTLY
+            from gamestonk_terminal.models import gamestonk_terminal
+            df_ta = gamestonk_terminal.ta.overlap.ema(df_stock["5. adjusted close"], n_length, n_offset)
+        else:
+            # CALL HELPER DIRECTLY
+            from gamestonk_terminal.models import gamestonk_terminal
+            df_ta = gamestonk_terminal.ta.overlap.ema(df_stock["4. close"], n_length, n_offset)
+        plt.plot(df_ta.index, df_ta.values)
+        l_legend.append(f"{length} EMA")
+    plt.title(f"EMA on {s_ticker}")
+    plt.xlim(df_stock.index[0], df_stock.index[-1])
+    plt.xlabel("Time")
+    plt.ylabel("Share Price ($)")
+    plt.legend(l_legend)
+    plt.grid(b=True, which="major", color="#666666", linestyle="-")
+    plt.minorticks_on()
+    plt.grid(b=True, which="minor", color="#999999", linestyle="-", alpha=0.2)
 
-        plt = terminal.getTerminal().ta.ema(
-            s_ticker,
-            s_interval,
-            ns_parser.n_length,
-            ns_parser.n_offset,
-        )
+    return fig
 
-        if gtff.USE_ION:
-            plt.ion()
 
-        plt.show()
-        print("")
+def ema_option2(gst, n_length, n_offset):
+    fig, ax = plt.subplots(figsize=plot_autoscale(), dpi=PLOT_DPI)
 
-    except Exception as e:
-        print(e)
-        print("")
+    if gst.instrument.interval == "1440min":
+        plt.plot(gst.instrument.data.index, gst.instrument.data["5. adjusted close"].values, color="k")
+    else:
+        plt.plot(gst.instrument.data.index, gst.instrument.data["4. close"].values, color="k")
+    l_legend = list()
+    l_legend.append(gst.instrument.ticker)
+
+    for length in [n_length]:
+        # CALL METHOD OF TA CLASS
+        df_ta = gst.ta.ema(n_length, n_offset)
+
+        plt.plot(df_ta.index, df_ta.values)
+        l_legend.append(f"{length} EMA")
+    plt.title(f"EMA on {gst.instrument.ticker}")
+    plt.xlim(gst.instrument.data.index[0], gst.instrument.data.index[-1])
+    plt.xlabel("Time")
+    plt.ylabel("Share Price ($)")
+    plt.legend(l_legend)
+    plt.grid(b=True, which="major", color="#666666", linestyle="-")
+    plt.minorticks_on()
+    plt.grid(b=True, which="minor", color="#999999", linestyle="-", alpha=0.2)
+
+    return fig
 
 
 def sma(l_args, s_ticker, s_interval, df_stock):

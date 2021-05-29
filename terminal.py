@@ -192,7 +192,7 @@ def main():
             main_cmd = True
 
         elif ns_known_args.opt == "load":
-            s_ticker, s_start, s_interval, df_stock = load(
+            s_ticker, s_start, s_interval, df_stock, gst = load(
                 l_args, s_ticker, s_start, s_interval, df_stock
             )
             main_cmd = True
@@ -279,6 +279,7 @@ def main():
                     s_ticker.split(".")[0] if "." in s_ticker else s_ticker,
                     s_start,
                     s_interval,
+                    gst,
                 )
             else:
                 print("Please load a ticker using <load TICKER>")

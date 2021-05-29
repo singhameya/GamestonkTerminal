@@ -21,17 +21,18 @@ def getGST():
         return gst
 
 class GamestonkTerminal:
-    def __init__(self):
-        self.cfg = cfg
-        self.intrument = Instrument()
-        self.ta = ta.TechnicalAnalysis(instrument=self.intrument)
-        self.__df_stock = pd.DataFrame()
-
-    def load(
-        self,
-        intrument:Instrument,
+    def __init__(self,
+        type:str="stock", # could be forex, crypto, etf
+        ticker:str="GME",
+        data:pd.DataFrame=None,
+        interval:int="1440min",
+        prepost:bool=True,
+        start:datetime=None, # Default to 1 year ago or so
+        source:str=None, # Source of data, default to Yahoo finance
     ):
-        self.intrument = intrument
+        self.cfg = cfg
+        self.instrument = Instrument(type, ticker, data, interval, prepost, start, source)
+        self.ta = ta.TechnicalAnalysis(instrument=self.instrument)
 
     def clear(
         self,

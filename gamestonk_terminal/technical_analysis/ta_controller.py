@@ -9,6 +9,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from prompt_toolkit.completion import NestedCompleter
 
+from gamestonk_terminal.helper_funcs import (
+    check_positive,
+    parse_known_args_and_warn,
+    plot_autoscale,
+)
+from gamestonk_terminal.config_plot import PLOT_DPI
+
 from gamestonk_terminal import feature_flags as gtff
 from gamestonk_terminal.helper_funcs import get_flair
 from gamestonk_terminal.menu import session
@@ -36,6 +43,7 @@ class TechnicalAnalysisController:
         "recom",
         "pr",
         "ema",
+        "ema2",
         "sma",
         "vwap",
         "cci",
@@ -55,6 +63,7 @@ class TechnicalAnalysisController:
         ticker: str,
         start: datetime,
         interval: str,
+        gst,
     ):
         """Constructor"""
         self.stock = stock
@@ -62,6 +71,7 @@ class TechnicalAnalysisController:
         self.start = start
         self.interval = interval
         self.delete_img = False
+        self.gst = gst
         self.ta_parser = argparse.ArgumentParser(add_help=False, prog="ta")
         self.ta_parser.add_argument(
             "cmd",
@@ -94,6 +104,7 @@ class TechnicalAnalysisController:
         print("")
         print("overlap:")
         print("   ema         exponential moving average")
+        print("   ema2        TEST exponential moving average")
         print("   sma         simple moving average")
         print("   vwap        volume weighted average price")
         print("momentum:")
@@ -168,7 +179,107 @@ class TechnicalAnalysisController:
     # OVERLAP
     def call_ema(self, other_args: List[str]):
         """Process ema command"""
-        ta_overlap.ema(other_args, self.ticker, self.interval, self.stock)
+        parser = argparse.ArgumentParser(
+        add_help=False,
+        prog="ema",
+        description="""
+            The Exponential Moving Average is a staple of technical
+            analysis and is used in countless technical indicators. In a Simple Moving
+            Average, each value in the time period carries equal weight, and values outside
+            of the time period are not included in the average. However, the Exponential
+            Moving Average is a cumulative calculation, including all data. Past values have
+            a diminishing contribution to the average, while more recent values have a greater
+            contribution. This method allows the moving average to be more responsive to changes
+            in the data.
+        """,
+        )
+        parser.add_argument(
+            "-l",
+            "--length",
+            action="store",
+            dest="n_length",
+            type=check_positive,
+            default=20,
+            help="length",
+        )
+        parser.add_argument(
+            "-o",
+            "--offset",
+            action="store",
+            dest="n_offset",
+            type=check_positive,
+            default=0,
+            help="offset",
+        )
+
+        try:
+            ns_parser = parse_known_args_and_warn(parser, other_args)
+            if not ns_parser:
+                return
+
+            chart = ta_overlap.ema(self.stock, self.ticker, self.interval, ns_parser.n_length, ns_parser.n_offset)
+
+            if gtff.USE_ION:
+                plt.ion()
+
+            plt.show()
+            print("")
+
+        except Exception as e:
+            print(e)
+            print("")
+
+    def call_ema2(self, other_args: List[str]):
+        """Process ema option 2 command"""
+        parser = argparse.ArgumentParser(
+        add_help=False,
+        prog="ema2",
+        description="""
+            The Exponential Moving Average is a staple of technical
+            analysis and is used in countless technical indicators. In a Simple Moving
+            Average, each value in the time period carries equal weight, and values outside
+            of the time period are not included in the average. However, the Exponential
+            Moving Average is a cumulative calculation, including all data. Past values have
+            a diminishing contribution to the average, while more recent values have a greater
+            contribution. This method allows the moving average to be more responsive to changes
+            in the data.
+        """,
+        )
+        parser.add_argument(
+            "-l",
+            "--length",
+            action="store",
+            dest="n_length",
+            type=check_positive,
+            default=20,
+            help="length",
+        )
+        parser.add_argument(
+            "-o",
+            "--offset",
+            action="store",
+            dest="n_offset",
+            type=check_positive,
+            default=0,
+            help="offset",
+        )
+
+        try:
+            ns_parser = parse_known_args_and_warn(parser, other_args)
+            if not ns_parser:
+                return
+
+            chart = ta_overlap.ema_option2(self.gst, ns_parser.n_length, ns_parser.n_offset)
+
+            if gtff.USE_ION:
+                plt.ion()
+
+            plt.show()
+            print("")
+
+        except Exception as e:
+            print(e)
+            print("")
 
     def call_sma(self, other_args: List[str]):
         """Process sma command"""
@@ -219,10 +330,10 @@ class TechnicalAnalysisController:
         ta_volume.obv(other_args, self.ticker, self.interval, self.stock)
 
 
-def menu(stock: pd.DataFrame, ticker: str, start: datetime, interval: str):
+def menu(stock: pd.DataFrame, ticker: str, start: datetime, interval: str, gst=None):
     """Technical Analysis Menu"""
 
-    ta_controller = TechnicalAnalysisController(stock, ticker, start, interval)
+    ta_controller = TechnicalAnalysisController(stock, ticker, start, interval, gst)
     ta_controller.call_help(None)
 
     while True:
