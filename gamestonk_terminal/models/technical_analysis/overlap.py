@@ -2,7 +2,7 @@ import pandas as pd
 import pandas_ta as ta
 
 
-def ema(data: pd.DataFrame, length: int = 20, offset: int = 0) -> pd.DataFrame:
+def ema(close: pd.DataFrame, length: int = 20, offset: int = 0) -> pd.DataFrame:
     """Exponential Moving average
 
     The Exponential Moving Average is a staple of technical analysis and is used in countless
@@ -27,10 +27,10 @@ def ema(data: pd.DataFrame, length: int = 20, offset: int = 0) -> pd.DataFrame:
     pd.DataFrame
         Dataframe with data with EMA applied
     """
-    return ta.ema(data, length=length, offset=offset).dropna()
+    return ta.ema(close, length=length, offset=offset).dropna()
 
 
-def sma(data: pd.DataFrame, length: int = 20, offset: int = 0) -> pd.DataFrame:
+def sma(close: pd.DataFrame, length: int = 20, offset: int = 0) -> pd.DataFrame:
     """Simple Moving average
 
     Moving Averages are used to smooth the data in an array to help eliminate noise
@@ -55,7 +55,7 @@ def sma(data: pd.DataFrame, length: int = 20, offset: int = 0) -> pd.DataFrame:
     pd.DataFrame
         Dataframe with data with EMA applied
     """
-    return ta.sma(data, length=length, offset=offset).dropna()
+    return ta.sma(close, length=length, offset=offset).dropna()
 
 
 def vwap(

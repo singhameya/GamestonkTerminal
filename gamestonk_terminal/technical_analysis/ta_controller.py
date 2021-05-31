@@ -283,7 +283,6 @@ class TechnicalAnalysisController:
                 by volume. It is typically used with intraday charts to identify general direction.
             """,
         )
-
         parser.add_argument(
             "-o",
             "--offset",
@@ -313,19 +312,281 @@ class TechnicalAnalysisController:
     # MOMENTUM
     def call_cci(self, other_args: List[str]):
         """Process cci command"""
-        ta_momentum.cci(other_args, self.ticker, self.interval, self.stock)
+        parser = argparse.ArgumentParser(
+            add_help=False,
+            prog="cci",
+            description="""
+                The CCI is designed to detect beginning and ending market trends.
+                The range of 100 to -100 is the normal trading range. CCI values outside of this
+                range indicate overbought or oversold conditions. You can also look for price
+                divergence in the CCI. If the price is making new highs, and the CCI is not,
+                then a price correction is likely.
+            """,
+        )
+        parser.add_argument(
+            "-l",
+            "--length",
+            action="store",
+            dest="length",
+            type=check_positive,
+            default=14,
+            help="length",
+        )
+        parser.add_argument(
+            "-s",
+            "--scalar",
+            action="store",
+            dest="scalar",
+            type=check_positive,
+            default=0.015,
+            help="scalar",
+        )
+        parser.add_argument(
+            "-o",
+            "--offset",
+            action="store",
+            dest="offset",
+            type=check_positive,
+            default=0,
+            help="offset",
+        )
+        try:
+            ns_parser = parse_known_args_and_warn(parser, other_args)
+            if not ns_parser:
+                return
+
+            _ = ta_momentum.cci(
+                self.gst, ns_parser.length, ns_parser.scalar, ns_parser.offset
+            )
+
+            if gtff.USE_ION:
+                plt.ion()
+
+            plt.show()
+            print("")
+
+        except Exception as e:
+            print(e, "\n")
 
     def call_macd(self, other_args: List[str]):
         """Process macd command"""
-        ta_momentum.macd(other_args, self.ticker, self.interval, self.stock)
+        parser = argparse.ArgumentParser(
+            add_help=False,
+            prog="macd",
+            description="""
+                The Moving Average Convergence Divergence (MACD) is the difference
+                between two Exponential Moving Averages. The Signal line is an Exponential Moving
+                Average of the MACD. \n \n The MACD signals trend changes and indicates the start
+                of new trend direction. High values indicate overbought conditions, low values
+                indicate oversold conditions. Divergence with the price indicates an end to the
+                current trend, especially if the MACD is at extreme high or low values. When the MACD
+                line crosses above the signal line a buy signal is generated. When the MACD crosses
+                below the signal line a sell signal is generated. To confirm the signal, the MACD
+                should be above zero for a buy, and below zero for a sell.
+            """,
+        )
+        parser.add_argument(
+            "-f",
+            "--fast",
+            action="store",
+            dest="fast",
+            type=check_positive,
+            default=12,
+            help="The short period.",
+        )
+        parser.add_argument(
+            "-s",
+            "--slow",
+            action="store",
+            dest="slow",
+            type=check_positive,
+            default=26,
+            help="The long period.",
+        )
+        parser.add_argument(
+            "--signal",
+            action="store",
+            dest="signal",
+            type=check_positive,
+            default=9,
+            help="The signal period.",
+        )
+        parser.add_argument(
+            "-o",
+            "--offset",
+            action="store",
+            dest="offset",
+            type=check_positive,
+            default=0,
+            help="How many periods to offset the result.",
+        )
+        try:
+            ns_parser = parse_known_args_and_warn(parser, other_args)
+            if not ns_parser:
+                return
+
+            _ = ta_momentum.macd(
+                self.gst,
+                ns_parser.fast,
+                ns_parser.slow,
+                ns_parser.signal,
+                ns_parser.offset,
+            )
+
+            if gtff.USE_ION:
+                plt.ion()
+
+            plt.show()
+            print("")
+
+        except Exception as e:
+            print(e, "\n")
 
     def call_rsi(self, other_args: List[str]):
         """Process rsi command"""
-        ta_momentum.rsi(other_args, self.ticker, self.interval, self.stock)
+        parser = argparse.ArgumentParser(
+            add_help=False,
+            prog="rsi",
+            description="""
+                The Relative Strength Index (RSI) calculates a ratio of the
+                recent upward price movements to the absolute price movement. The RSI ranges
+                from 0 to 100. The RSI is interpreted as an overbought/oversold indicator when
+                the value is over 70/below 30. You can also look for divergence with price. If
+                the price is making new highs/lows, and the RSI is not, it indicates a reversal.
+            """,
+        )
+        parser.add_argument(
+            "-l",
+            "--length",
+            action="store",
+            dest="length",
+            type=check_positive,
+            default=14,
+            help="length",
+        )
+        parser.add_argument(
+            "-s",
+            "--scalar",
+            action="store",
+            dest="scalar",
+            type=check_positive,
+            default=100,
+            help="scalar",
+        )
+        parser.add_argument(
+            "-d",
+            "--drift",
+            action="store",
+            dest="drift",
+            type=check_positive,
+            default=1,
+            help="drift",
+        )
+        parser.add_argument(
+            "-o",
+            "--offset",
+            action="store",
+            dest="offset",
+            type=check_positive,
+            default=0,
+            help="offset",
+        )
+
+        try:
+            ns_parser = parse_known_args_and_warn(parser, other_args)
+            if not ns_parser:
+                return
+
+            _ = ta_momentum.rsi(
+                self.gst,
+                ns_parser.length,
+                ns_parser.scalar,
+                ns_parser.drift,
+                ns_parser.offset,
+            )
+
+            if gtff.USE_ION:
+                plt.ion()
+
+            plt.show()
+            print("")
+
+        except Exception as e:
+            print(e)
+            print("")
 
     def call_stoch(self, other_args: List[str]):
         """Process stoch command"""
-        ta_momentum.stoch(other_args, self.ticker, self.interval, self.stock)
+        parser = argparse.ArgumentParser(
+            add_help=False,
+            prog="stoch",
+            description="""
+                The Stochastic Oscillator measures where the close is in relation
+                to the recent trading range. The values range from zero to 100. %D values over 75
+                indicate an overbought condition; values under 25 indicate an oversold condition.
+                When the Fast %D crosses above the Slow %D, it is a buy signal; when it crosses
+                below, it is a sell signal. The Raw %K is generally considered too erratic to use
+                for crossover signals.
+            """,
+        )
+        parser.add_argument(
+            "-k",
+            "--fastkperiod",
+            action="store",
+            dest="fastkperiod",
+            type=check_positive,
+            default=14,
+            help="The time period of the fastk moving average",
+        )
+        parser.add_argument(
+            "-d",
+            "--slowdperiod",
+            action="store",
+            dest="slowdperiod",
+            type=check_positive,
+            default=3,
+            help="The time period of the slowd moving average",
+        )
+        parser.add_argument(
+            "--slowkperiod",
+            action="store",
+            dest="slowkperiod",
+            type=check_positive,
+            default=3,
+            help="The time period of the slowk moving average",
+        )
+        parser.add_argument(
+            "-o",
+            "--offset",
+            action="store",
+            dest="offset",
+            type=check_positive,
+            default=0,
+            help="offset",
+        )
+
+        try:
+            ns_parser = parse_known_args_and_warn(parser, other_args)
+            if not ns_parser:
+                return
+
+            _ = ta_momentum.stoch(
+                self.gst,
+                ns_parser.fastkperiod,
+                ns_parser.slowdperiod,
+                ns_parser.slowkperiod,
+                ns_parser.offset,
+            )
+
+            if gtff.USE_ION:
+                plt.ion()
+
+            plt.show()
+            print("")
+
+        except Exception as e:
+            print(e)
+            print("")
 
     # TREND
     def call_adx(self, other_args: List[str]):
