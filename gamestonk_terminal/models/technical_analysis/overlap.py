@@ -56,3 +56,42 @@ def sma(data: pd.DataFrame, length: int = 20, offset: int = 0) -> pd.DataFrame:
         Dataframe with data with EMA applied
     """
     return ta.sma(data, length=length, offset=offset).dropna()
+
+
+def vwap(
+    high: pd.DataFrame,
+    low: pd.DataFrame,
+    close: pd.DataFrame,
+    volume: pd.DataFrame,
+    offset: int = 0,
+) -> pd.DataFrame:
+    """Volume Weighted Average Price
+
+    The VWAP that measures the average typical price by volume.
+    It is typically used with intraday charts to identify general direction.
+
+    Parameters
+    ----------
+    high : DataFrame
+        High price
+    low : DataFrame
+        Low price
+    close : DataFrame
+        Closing price
+    volume : DataFrame
+        Volume
+    offset : int
+        Vertical offset to use on data
+
+    Returns
+    -------
+    pd.DataFrame
+        Dataframe with data with EMA applied
+    """
+    return ta.vwap(
+        high=high,
+        low=low,
+        close=close,
+        volume=volume,
+        offset=offset,
+    )

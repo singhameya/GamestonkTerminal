@@ -275,7 +275,40 @@ class TechnicalAnalysisController:
 
     def call_vwap(self, other_args: List[str]):
         """Process vwap command"""
-        ta_overlap.vwap(other_args, self.ticker, self.interval, self.stock)
+        parser = argparse.ArgumentParser(
+            add_help=False,
+            prog="vwap",
+            description="""
+                The Volume Weighted Average Price that measures the average typical price
+                by volume. It is typically used with intraday charts to identify general direction.
+            """,
+        )
+
+        parser.add_argument(
+            "-o",
+            "--offset",
+            action="store",
+            dest="offset",
+            type=check_positive,
+            default=0,
+            help="offset",
+        )
+
+        try:
+            ns_parser = parse_known_args_and_warn(parser, other_args)
+            if not ns_parser:
+                return
+
+            _ = ta_overlap.vwap(self.gst, ns_parser.offset)
+
+            if gtff.USE_ION:
+                plt.ion()
+
+            plt.show()
+            print("")
+
+        except Exception as e:
+            print(e, "\n")
 
     # MOMENTUM
     def call_cci(self, other_args: List[str]):
