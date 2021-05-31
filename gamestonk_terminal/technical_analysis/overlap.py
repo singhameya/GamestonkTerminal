@@ -14,48 +14,19 @@ from gamestonk_terminal import feature_flags as gtff
 register_matplotlib_converters()
 
 
-def ema(df_stock, s_ticker, s_interval, n_length, n_offset):
-    #gst = gamestonk_terminal.getGST()
-    #gst.ta.ema(df_stock, n_length, n_offset)
-
-    fig, ax = plt.subplots(figsize=plot_autoscale(), dpi=PLOT_DPI)
-
-    if s_interval == "1440min":
-        plt.plot(df_stock.index, df_stock["5. adjusted close"].values, color="k")
-    else:
-        plt.plot(df_stock.index, df_stock["4. close"].values, color="k")
-    l_legend = list()
-    l_legend.append(s_ticker)
-    for length in [n_length]:
-        if s_interval == "1440min":
-            # CALL HELPER DIRECTLY
-            from gamestonk_terminal.models import gamestonk_terminal
-            df_ta = gamestonk_terminal.ta.overlap.ema(df_stock["5. adjusted close"], n_length, n_offset)
-        else:
-            # CALL HELPER DIRECTLY
-            from gamestonk_terminal.models import gamestonk_terminal
-            df_ta = gamestonk_terminal.ta.overlap.ema(df_stock["4. close"], n_length, n_offset)
-        plt.plot(df_ta.index, df_ta.values)
-        l_legend.append(f"{length} EMA")
-    plt.title(f"EMA on {s_ticker}")
-    plt.xlim(df_stock.index[0], df_stock.index[-1])
-    plt.xlabel("Time")
-    plt.ylabel("Share Price ($)")
-    plt.legend(l_legend)
-    plt.grid(b=True, which="major", color="#666666", linestyle="-")
-    plt.minorticks_on()
-    plt.grid(b=True, which="minor", color="#999999", linestyle="-", alpha=0.2)
-
-    return fig
-
-
-def ema_option2(gst, n_length, n_offset):
-    fig, ax = plt.subplots(figsize=plot_autoscale(), dpi=PLOT_DPI)
+def ema(gst, n_length, n_offset):
+    fig, _ = plt.subplots(figsize=plot_autoscale(), dpi=PLOT_DPI)
 
     if gst.instrument.interval == "1440min":
-        plt.plot(gst.instrument.data.index, gst.instrument.data["5. adjusted close"].values, color="k")
+        plt.plot(
+            gst.instrument.data.index,
+            gst.instrument.data["5. adjusted close"].values,
+            color="k",
+        )
     else:
-        plt.plot(gst.instrument.data.index, gst.instrument.data["4. close"].values, color="k")
+        plt.plot(
+            gst.instrument.data.index, gst.instrument.data["4. close"].values, color="k"
+        )
     l_legend = list()
     l_legend.append(gst.instrument.ticker)
 

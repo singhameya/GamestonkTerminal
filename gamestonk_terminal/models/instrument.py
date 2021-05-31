@@ -4,21 +4,19 @@ from datetime import datetime
 # IMPORTATION THIRDPARTY
 import pandas as pd
 
-# IMPORTATION INTERNAL
-
 
 class Instrument:
     def __init__(
         self,
-        type:str="stock", # could be forex, crypto, etf
-        ticker:str="GME",
-        data:pd.DataFrame=None,
-        interval:int="1440min",
-        prepost:bool=True,
-        start:datetime=None, # Default to 1 year ago or so
-        source:str=None, # Source of data, default to Yahoo finance
+        context: str = "stock",
+        ticker: str = "GME",
+        data: pd.DataFrame = None,
+        interval: str = "1440min",
+        prepost: bool = True,
+        start: datetime = None,
+        source: str = None,
     ) -> None:
-        self.type = type
+        self.context = context
         self.ticker = ticker
         self.data = data
         self.interval = interval

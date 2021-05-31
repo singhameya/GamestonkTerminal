@@ -1,6 +1,7 @@
 import pandas as pd
 import pandas_ta as ta
 
+
 def ema(data: pd.DataFrame, length: int = 20, offset: int = 0) -> pd.DataFrame:
     """Exponential Moving average
 
