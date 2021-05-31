@@ -15,7 +15,7 @@ class GamestonkTerminal:
         self,
         context: str = "stock",  # could be forex, crypto, etf
         ticker: str = "GME",
-        data: pd.DataFrame = None,
+        data: pd.DataFrame = pd.DataFrame(),
         interval: str = "1440min",
         prepost: bool = True,
         start: datetime = None,  # Default to 1 year ago or so

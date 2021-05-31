@@ -192,17 +192,16 @@ class TechnicalAnalysisController:
         parser.add_argument(
             "-l",
             "--length",
-            action="store",
-            dest="n_length",
-            type=check_positive,
-            default=20,
-            help="length",
+            dest="length",
+            type=lambda s: [int(item) for item in s.split(",")],
+            default=[20, 50],
+            help="length of MA window",
         )
         parser.add_argument(
             "-o",
             "--offset",
             action="store",
-            dest="n_offset",
+            dest="offset",
             type=check_positive,
             default=0,
             help="offset",
@@ -213,7 +212,7 @@ class TechnicalAnalysisController:
             if not ns_parser:
                 return
 
-            _ = ta_overlap.ema(self.gst, ns_parser.n_length, ns_parser.n_offset)
+            _ = ta_overlap.ema(self.gst, ns_parser.length, ns_parser.offset)
 
             if gtff.USE_ION:
                 plt.ion()
@@ -222,12 +221,57 @@ class TechnicalAnalysisController:
             print("")
 
         except Exception as e:
-            print(e)
-            print("")
+            print(e, "\n")
 
     def call_sma(self, other_args: List[str]):
         """Process sma command"""
-        ta_overlap.sma(other_args, self.ticker, self.interval, self.stock)
+        parser = argparse.ArgumentParser(
+            add_help=False,
+            prog="sma",
+            description="""
+                Moving Averages are used to smooth the data in an array to
+                help eliminate noise and identify trends. The Simple Moving Average is literally
+                the simplest form of a moving average. Each output value is the average of the
+                previous n values. In a Simple Moving Average, each value in the time period carries
+                equal weight, and values outside of the time period are not included in the average.
+                This makes it less responsive to recent changes in the data, which can be useful for
+                filtering out those changes.
+            """,
+        )
+
+        parser.add_argument(
+            "-l",
+            "--length",
+            dest="length",
+            type=lambda s: [int(item) for item in s.split(",")],
+            default=[20, 50],
+            help="length of MA window",
+        )
+        parser.add_argument(
+            "-o",
+            "--offset",
+            action="store",
+            dest="offset",
+            type=check_positive,
+            default=0,
+            help="offset",
+        )
+
+        try:
+            ns_parser = parse_known_args_and_warn(parser, other_args)
+            if not ns_parser:
+                return
+
+            _ = ta_overlap.sma(self.gst, ns_parser.length, ns_parser.offset)
+
+            if gtff.USE_ION:
+                plt.ion()
+
+            plt.show()
+            print("")
+
+        except Exception as e:
+            print(e, "\n")
 
     def call_vwap(self, other_args: List[str]):
         """Process vwap command"""

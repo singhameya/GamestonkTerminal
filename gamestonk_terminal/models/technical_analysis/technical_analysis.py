@@ -16,3 +16,10 @@ class TechnicalAnalysis:
                 self.instrument.data["5. adjusted close"], length, offset
             )
         return overlap.ema(self.instrument.data["4. close"], length, offset)
+
+    def sma(self, length: int, offset: int) -> pd.DataFrame:
+        if self.instrument.interval == "1440min":
+            return overlap.sma(
+                self.instrument.data["5. adjusted close"], length, offset
+            )
+        return overlap.sma(self.instrument.data["4. close"], length, offset)

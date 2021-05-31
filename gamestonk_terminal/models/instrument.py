@@ -10,7 +10,7 @@ class Instrument:
         self,
         context: str = "stock",
         ticker: str = "GME",
-        data: pd.DataFrame = None,
+        data: pd.DataFrame = pd.DataFrame(),
         interval: str = "1440min",
         prepost: bool = True,
         start: datetime = None,
