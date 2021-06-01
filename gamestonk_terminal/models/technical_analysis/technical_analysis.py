@@ -3,7 +3,7 @@ import pandas as pd
 
 # IMPORTATION INTERNAL
 from gamestonk_terminal.models.instrument import Instrument
-from gamestonk_terminal.models.technical_analysis import overlap, momentum
+from gamestonk_terminal.models.technical_analysis import overlap, momentum, trend
 
 
 class TechnicalAnalysis:
@@ -71,5 +71,25 @@ class TechnicalAnalysis:
             fastkperiod=fastkperiod,
             slowdperiod=slowdperiod,
             slowkperiod=slowkperiod,
+            offset=offset,
+        )
+
+    def adx(self, length: int, scalar: int, drift: int, offset: int) -> pd.DataFrame:
+        return trend.adx(
+            high=self.instrument.data["high"],
+            low=self.instrument.data["low"],
+            close=self.instrument.data["close"],
+            length=length,
+            scalar=scalar,
+            drift=drift,
+            offset=offset,
+        )
+
+    def aroon(self, length: int, scalar: int, offset: int) -> pd.DataFrame:
+        return trend.aroon(
+            high=self.instrument.data["high"],
+            low=self.instrument.data["low"],
+            length=length,
+            scalar=scalar,
             offset=offset,
         )

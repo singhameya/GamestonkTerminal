@@ -17,9 +17,9 @@ from gamestonk_terminal.helper_funcs import (
 from gamestonk_terminal import feature_flags as gtff
 from gamestonk_terminal.helper_funcs import get_flair
 from gamestonk_terminal.menu import session
-from gamestonk_terminal.technical_analysis import momentum as ta_momentum
-from gamestonk_terminal.technical_analysis import overlap as ta_overlap
-from gamestonk_terminal.technical_analysis import trend_indicators as ta_trend
+from gamestonk_terminal.technical_analysis import momentum_view
+from gamestonk_terminal.technical_analysis import overlap_view
+from gamestonk_terminal.technical_analysis import trend_view
 from gamestonk_terminal.technical_analysis import volatility as ta_volatility
 from gamestonk_terminal.technical_analysis import volume as ta_volume
 from gamestonk_terminal.technical_analysis import finbrain_view
@@ -212,7 +212,7 @@ class TechnicalAnalysisController:
             if not ns_parser:
                 return
 
-            _ = ta_overlap.ema(self.gst, ns_parser.length, ns_parser.offset)
+            _ = overlap_view.plot_ema(self.gst, ns_parser.length, ns_parser.offset)
 
             if gtff.USE_ION:
                 plt.ion()
@@ -262,7 +262,7 @@ class TechnicalAnalysisController:
             if not ns_parser:
                 return
 
-            _ = ta_overlap.sma(self.gst, ns_parser.length, ns_parser.offset)
+            _ = overlap_view.plot_sma(self.gst, ns_parser.length, ns_parser.offset)
 
             if gtff.USE_ION:
                 plt.ion()
@@ -298,7 +298,7 @@ class TechnicalAnalysisController:
             if not ns_parser:
                 return
 
-            _ = ta_overlap.vwap(self.gst, ns_parser.offset)
+            _ = overlap_view.plot_vwap(self.gst, ns_parser.offset)
 
             if gtff.USE_ION:
                 plt.ion()
@@ -355,7 +355,7 @@ class TechnicalAnalysisController:
             if not ns_parser:
                 return
 
-            _ = ta_momentum.cci(
+            _ = momentum_view.plot_cci(
                 self.gst, ns_parser.length, ns_parser.scalar, ns_parser.offset
             )
 
@@ -425,7 +425,7 @@ class TechnicalAnalysisController:
             if not ns_parser:
                 return
 
-            _ = ta_momentum.macd(
+            _ = momentum_view.plot_macd(
                 self.gst,
                 ns_parser.fast,
                 ns_parser.slow,
@@ -497,7 +497,7 @@ class TechnicalAnalysisController:
             if not ns_parser:
                 return
 
-            _ = ta_momentum.rsi(
+            _ = momentum_view.plot_rsi(
                 self.gst,
                 ns_parser.length,
                 ns_parser.scalar,
@@ -512,8 +512,7 @@ class TechnicalAnalysisController:
             print("")
 
         except Exception as e:
-            print(e)
-            print("")
+            print(e, "\n")
 
     def call_stoch(self, other_args: List[str]):
         """Process stoch command"""
@@ -570,7 +569,7 @@ class TechnicalAnalysisController:
             if not ns_parser:
                 return
 
-            _ = ta_momentum.stoch(
+            _ = momentum_view.plot_stoch(
                 self.gst,
                 ns_parser.fastkperiod,
                 ns_parser.slowdperiod,
@@ -585,17 +584,146 @@ class TechnicalAnalysisController:
             print("")
 
         except Exception as e:
-            print(e)
-            print("")
+            print(e, "\n")
 
     # TREND
     def call_adx(self, other_args: List[str]):
         """Process adx command"""
-        ta_trend.adx(other_args, self.ticker, self.interval, self.stock)
+        parser = argparse.ArgumentParser(
+            add_help=False,
+            prog="adx",
+            description="""
+                The ADX is a Welles Wilder style moving average of the Directional Movement Index (DX).
+                The values range from 0 to 100, but rarely get above 60. To interpret the ADX, consider
+                a high number to be a strong trend, and a low number, a weak trend.
+            """,
+        )
+        parser.add_argument(
+            "-l",
+            "--length",
+            action="store",
+            dest="length",
+            type=check_positive,
+            default=14,
+            help="length",
+        )
+        parser.add_argument(
+            "-s",
+            "--scalar",
+            action="store",
+            dest="scalar",
+            type=check_positive,
+            default=100,
+            help="scalar",
+        )
+        parser.add_argument(
+            "-d",
+            "--drift",
+            action="store",
+            dest="drift",
+            type=check_positive,
+            default=1,
+            help="drift",
+        )
+        parser.add_argument(
+            "-o",
+            "--offset",
+            action="store",
+            dest="offset",
+            type=check_positive,
+            default=0,
+            help="offset",
+        )
+
+        try:
+            ns_parser = parse_known_args_and_warn(parser, other_args)
+            if not ns_parser:
+                return
+
+            _ = trend_view.plot_adx(
+                self.gst,
+                ns_parser.length,
+                ns_parser.scalar,
+                ns_parser.drift,
+                ns_parser.offset,
+            )
+
+            if gtff.USE_ION:
+                plt.ion()
+
+            plt.show()
+            print("")
+
+        except Exception as e:
+            print(e, "\n")
 
     def call_aroon(self, other_args: List[str]):
         """Process aroon command"""
-        ta_trend.aroon(other_args, self.ticker, self.interval, self.stock)
+        parser = argparse.ArgumentParser(
+            add_help=False,
+            prog="aroon",
+            description="""
+                The word aroon is Sanskrit for "dawn's early light." The Aroon
+                indicator attempts to show when a new trend is dawning. The indicator consists
+                of two lines (Up and Down) that measure how long it has been since the highest
+                high/lowest low has occurred within an n period range. \n \n When the Aroon Up is
+                staying between 70 and 100 then it indicates an upward trend. When the Aroon Down
+                is staying between 70 and 100 then it indicates an downward trend. A strong upward
+                trend is indicated when the Aroon Up is above 70 while the Aroon Down is below 30.
+                Likewise, a strong downward trend is indicated when the Aroon Down is above 70 while
+                the Aroon Up is below 30. Also look for crossovers. When the Aroon Down crosses above
+                the Aroon Up, it indicates a weakening of the upward trend (and vice versa).
+            """,
+        )
+
+        parser.add_argument(
+            "-l",
+            "--length",
+            action="store",
+            dest="length",
+            type=check_positive,
+            default=25,
+            help="length",
+        )
+        parser.add_argument(
+            "-s",
+            "--scalar",
+            action="store",
+            dest="scalar",
+            type=check_positive,
+            default=100,
+            help="scalar",
+        )
+        parser.add_argument(
+            "-o",
+            "--offset",
+            action="store",
+            dest="offset",
+            type=check_positive,
+            default=0,
+            help="offset",
+        )
+
+        try:
+            ns_parser = parse_known_args_and_warn(parser, other_args)
+            if not ns_parser:
+                return
+
+            _ = trend_view.plot_aroon(
+                self.gst,
+                ns_parser.length,
+                ns_parser.scalar,
+                ns_parser.offset,
+            )
+
+            if gtff.USE_ION:
+                plt.ion()
+
+            plt.show()
+            print("")
+
+        except Exception as e:
+            print(e, "\n")
 
     # VOLATILITY
     def call_bbands(self, other_args: List[str]):
