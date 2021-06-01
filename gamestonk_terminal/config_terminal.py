@@ -66,4 +66,4 @@ API_BINANCE_KEY = os.getenv("GT_API_BINANCE_KEY") or "REPLACE_ME"
 API_BINANCE_SECRET = os.getenv("GT_API_BINANCE_SECRET") or "REPLACE_ME"
 
 # https://finnhub.io
-API_FINNHUB_KEY = os.getenv("GT_API_FINNHUB_KEY") or "REPLACE_ME"
+API_FINNHUB_KEY = os.getenv("GT_API_FINNHUB_KEY") or "c23k26qad3ieeb1lftug"

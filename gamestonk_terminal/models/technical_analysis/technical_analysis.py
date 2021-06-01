@@ -12,6 +12,7 @@ from gamestonk_terminal.models.technical_analysis import (
     volume,
     finbrain,
     tradingview,
+    finnhub,
 )
 
 
@@ -152,4 +153,14 @@ class TechnicalAnalysis:
             screener=screener,
             exchange=exchange,
             interval=interval,
+        )
+
+    def finnhub_pattern_recognition(
+        self,
+        resolution: str,
+    ) -> pd.DataFrame:
+        return finnhub.pattern_recognition(
+            API_FINNHUB_KEY=cfg.API_FINNHUB_KEY,
+            ticker=self.instrument.ticker,
+            resolution=resolution,
         )

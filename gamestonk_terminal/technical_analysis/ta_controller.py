@@ -255,7 +255,32 @@ class TechnicalAnalysisController:
 
     def call_pr(self, other_args: List[str]):
         """Process pr command"""
-        finnhub_view.pattern_recognition_view(other_args, self.ticker)
+        parser = argparse.ArgumentParser(
+            add_help=False,
+            prog="pr",
+            description="""
+                Display pattern recognition signals on the data. [Source: https://finnhub.io]
+            """,
+        )
+        parser.add_argument(
+            "-r",
+            "--resolution",
+            action="store",
+            dest="resolution",
+            type=str,
+            default="D",
+            choices=["1", "5", "15", "30", "60", "D", "W", "M"],
+            help="Plot resolution to look for pattern signals",
+        )
+        try:
+            ns_parser = parse_known_args_and_warn(parser, other_args)
+            if not ns_parser:
+                return
+
+            finnhub_view.plot_pattern_recognition(self.gst, ns_parser.resolution)
+
+        except Exception as e:
+            print(e, "\n")
 
     # OVERLAP
     def call_ema(self, other_args: List[str]):
