@@ -8,6 +8,7 @@ from gamestonk_terminal.models.technical_analysis import (
     momentum,
     trend,
     volatility,
+    volume,
 )
 
 
@@ -105,5 +106,31 @@ class TechnicalAnalysis:
             length=length,
             std=std,
             mamode=mamode,
+            offset=offset,
+        )
+
+    def ad(self, offset: int, use_open: bool) -> pd.DataFrame:
+        if use_open:
+            return volume.ad_open(
+                high=self.instrument.data["high"],
+                low=self.instrument.data["low"],
+                close=self.instrument.data["close"],
+                volume=self.instrument.data["volume"],
+                offset=offset,
+                open_=self.instrument.data["open"],
+            )
+
+        return volume.ad(
+            high=self.instrument.data["high"],
+            low=self.instrument.data["low"],
+            close=self.instrument.data["close"],
+            volume=self.instrument.data["volume"],
+            offset=offset,
+        )
+
+    def obv(self, offset: int) -> pd.DataFrame:
+        return volume.obv(
+            close=self.instrument.data["close"],
+            volume=self.instrument.data["volume"],
             offset=offset,
         )

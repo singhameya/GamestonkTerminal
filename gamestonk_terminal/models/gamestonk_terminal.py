@@ -44,7 +44,7 @@ class GamestonkTerminal:
                     "2. high": "high",
                     "3. low": "low",
                     "4. close": "close",
-                    "6. volume": "volume",
+                    "5. volume": "volume",
                 },
                 inplace=True,
             )
