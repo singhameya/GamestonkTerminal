@@ -26,4 +26,26 @@ class GamestonkTerminal:
         self.instrument = Instrument(
             context, ticker, data, interval, prepost, start, source
         )
+        if interval == "1440min":
+            self.instrument.data.rename(
+                columns={
+                    "1. open": "open",
+                    "2. high": "high",
+                    "3. low": "low",
+                    "5. adjusted close": "close",
+                    "6. volume": "volume",
+                },
+                inplace=True,
+            )
+        else:
+            self.instrument.data.rename(
+                columns={
+                    "1. open": "open",
+                    "2. high": "high",
+                    "3. low": "low",
+                    "4. close": "close",
+                    "6. volume": "volume",
+                },
+                inplace=True,
+            )
         self.ta = ta.TechnicalAnalysis(instrument=self.instrument)

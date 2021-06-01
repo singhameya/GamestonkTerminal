@@ -14,16 +14,11 @@ register_matplotlib_converters()
 def ema(gst: gamestonk_terminal.GamestonkTerminal, length: List[int], offset: int):
     fig, _ = plt.subplots(figsize=plot_autoscale(), dpi=PLOT_DPI)
 
-    if gst.instrument.interval == "1440min":
-        plt.plot(
-            gst.instrument.data.index,
-            gst.instrument.data["5. adjusted close"].values,
-            color="k",
-        )
-    else:
-        plt.plot(
-            gst.instrument.data.index, gst.instrument.data["4. close"].values, color="k"
-        )
+    plt.plot(
+        gst.instrument.data.index,
+        gst.instrument.data["close"].values,
+        color="k",
+    )
     l_legend = list()
     l_legend.append(gst.instrument.ticker)
 
@@ -47,16 +42,11 @@ def ema(gst: gamestonk_terminal.GamestonkTerminal, length: List[int], offset: in
 def sma(gst: gamestonk_terminal.GamestonkTerminal, length: List[int], offset: int):
     fig, _ = plt.subplots(figsize=plot_autoscale(), dpi=PLOT_DPI)
 
-    if gst.instrument.interval == "1440min":
-        plt.plot(
-            gst.instrument.data.index,
-            gst.instrument.data["5. adjusted close"].values,
-            color="k",
-        )
-    else:
-        plt.plot(
-            gst.instrument.data.index, gst.instrument.data["4. close"].values, color="k"
-        )
+    plt.plot(
+        gst.instrument.data.index,
+        gst.instrument.data["close"].values,
+        color="k",
+    )
     l_legend = list()
     l_legend.append(gst.instrument.ticker)
 
@@ -78,22 +68,15 @@ def sma(gst: gamestonk_terminal.GamestonkTerminal, length: List[int], offset: in
 
 
 def vwap(gst: gamestonk_terminal.GamestonkTerminal, offset: int):
-    fig, _ = plt.subplots(figsize=plot_autoscale(), dpi=PLOT_DPI)
+    fig, axPrice = plt.subplots(figsize=plot_autoscale(), dpi=PLOT_DPI)
 
     df_ta = gst.ta.vwap(offset=offset)
 
-    _, axPrice = plt.subplots(figsize=plot_autoscale(), dpi=PLOT_DPI)
-
-    if gst.instrument.interval == "1440min":
-        plt.plot(
-            gst.instrument.data.index,
-            gst.instrument.data["5. adjusted close"].values,
-            color="k",
-        )
-    else:
-        plt.plot(
-            gst.instrument.data.index, gst.instrument.data["4. close"].values, color="k"
-        )
+    plt.plot(
+        gst.instrument.data.index,
+        gst.instrument.data["close"].values,
+        color="k",
+    )
     plt.plot(df_ta.index, df_ta.values)
     plt.title(f"VWAP on {gst.instrument.ticker}")
     plt.xlim(gst.instrument.data.index[0], gst.instrument.data.index[-1])
@@ -101,22 +84,13 @@ def vwap(gst: gamestonk_terminal.GamestonkTerminal, offset: int):
     plt.ylabel("Share Price ($)")
     plt.legend([gst.instrument.ticker, "VWAP"])
     _ = axPrice.twinx()
-    if gst.instrument.interval == "1440min":
-        plt.bar(
-            gst.instrument.data.index,
-            gst.instrument.data["6. volume"].values,
-            color="k",
-            alpha=0.8,
-            width=0.3,
-        )
-    else:
-        plt.bar(
-            gst.instrument.data.index,
-            gst.instrument.data["5. volume"].values,
-            color="k",
-            alpha=0.8,
-            width=0.3,
-        )
+    plt.bar(
+        gst.instrument.data.index,
+        gst.instrument.data["volume"].values,
+        color="k",
+        alpha=0.8,
+        width=0.3,
+    )
     plt.ylabel("Volume")
     plt.grid(b=True, which="major", color="#666666", linestyle="-")
     plt.minorticks_on()

@@ -12,25 +12,18 @@ register_matplotlib_converters()
 def cci(
     gst: gamestonk_terminal.GamestonkTerminal, length: int, scalar: int, offset: int
 ):
-
     fig, _ = plt.subplots(figsize=plot_autoscale(), dpi=PLOT_DPI)
 
     df_ta = gst.ta.cci(length=length, scalar=scalar, offset=offset)
 
     plt.subplot(211)
     plt.title(f"Commodity Channel Index (CCI) on {gst.instrument.ticker}")
-    if gst.instrument.interval == "1440min":
-        plt.plot(
-            gst.instrument.data.index,
-            gst.instrument.data["5. adjusted close"].values,
-            "k",
-            lw=2,
-        )
-    else:
-        plt.plot(
-            gst.instrument.data.index, gst.instrument.data["4. close"].values, "k", lw=2
-        )
-
+    plt.plot(
+        gst.instrument.data.index,
+        gst.instrument.data["close"].values,
+        "k",
+        lw=2,
+    )
     plt.ylabel("Share Price ($)")
     plt.grid(b=True, which="major", color="#666666", linestyle="-")
     plt.minorticks_on()
@@ -68,17 +61,12 @@ def macd(
     plt.title(
         f"Moving Average Convergence Divergence (MACD) on {gst.instrument.ticker}"
     )
-    if gst.instrument.interval == "1440min":
-        plt.plot(
-            gst.instrument.data.index,
-            gst.instrument.data["5. adjusted close"].values,
-            "k",
-            lw=2,
-        )
-    else:
-        plt.plot(
-            gst.instrument.data.index, gst.instrument.data["4. close"].values, "k", lw=2
-        )
+    plt.plot(
+        gst.instrument.data.index,
+        gst.instrument.data["close"].values,
+        "k",
+        lw=2,
+    )
     plt.xlim(gst.instrument.data.index[0], gst.instrument.data.index[-1])
     plt.ylabel("Share Price ($)")
     plt.grid(b=True, which="major", color="#666666", linestyle="-")
@@ -121,17 +109,12 @@ def rsi(
     )
 
     plt.subplot(211)
-    if gst.instrument.interval == "1440min":
-        plt.plot(
-            gst.instrument.data.index,
-            gst.instrument.data["5. adjusted close"].values,
-            "k",
-            lw=2,
-        )
-    else:
-        plt.plot(
-            gst.instrument.data.index, gst.instrument.data["4. close"].values, "k", lw=2
-        )
+    plt.plot(
+        gst.instrument.data.index,
+        gst.instrument.data["close"].values,
+        "k",
+        lw=2,
+    )
     plt.title(f"Relative Strength Index (RSI) on {gst.instrument.ticker}")
     plt.xlim(gst.instrument.data.index[0], gst.instrument.data.index[-1])
     plt.ylabel("Share Price ($)")
@@ -175,17 +158,12 @@ def stoch(
 
     plt.figure(figsize=plot_autoscale(), dpi=PLOT_DPI)
     plt.subplot(211)
-    if gst.instrument.interval == "1440min":
-        plt.plot(
-            gst.instrument.data.index,
-            gst.instrument.data["5. adjusted close"].values,
-            "k",
-            lw=2,
-        )
-    else:
-        plt.plot(
-            gst.instrument.data.index, gst.instrument.data["4. close"].values, "k", lw=2
-        )
+    plt.plot(
+        gst.instrument.data.index,
+        gst.instrument.data["close"].values,
+        "k",
+        lw=2,
+    )
     plt.title(
         f"Stochastic Relative Strength Index (STOCH RSI) on {gst.instrument.ticker}"
     )
