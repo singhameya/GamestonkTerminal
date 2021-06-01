@@ -3,7 +3,12 @@ import pandas as pd
 
 # IMPORTATION INTERNAL
 from gamestonk_terminal.models.instrument import Instrument
-from gamestonk_terminal.models.technical_analysis import overlap, momentum, trend
+from gamestonk_terminal.models.technical_analysis import (
+    overlap,
+    momentum,
+    trend,
+    volatility,
+)
 
 
 class TechnicalAnalysis:
@@ -91,5 +96,14 @@ class TechnicalAnalysis:
             low=self.instrument.data["low"],
             length=length,
             scalar=scalar,
+            offset=offset,
+        )
+
+    def bbands(self, length: int, std: int, mamode: str, offset: int) -> pd.DataFrame:
+        return volatility.bbands(
+            close=self.instrument.data["close"],
+            length=length,
+            std=std,
+            mamode=mamode,
             offset=offset,
         )
