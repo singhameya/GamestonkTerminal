@@ -835,7 +835,6 @@ class TechnicalAnalysisController:
             action="store_true",
             default=False,
             dest="use_open",
-            type=bool,
             help="uses open value of stock",
         )
 
