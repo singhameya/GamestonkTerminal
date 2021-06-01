@@ -9,6 +9,7 @@ from gamestonk_terminal.models.technical_analysis import (
     trend,
     volatility,
     volume,
+    finbrain,
 )
 
 
@@ -133,4 +134,9 @@ class TechnicalAnalysis:
             close=self.instrument.data["close"],
             volume=self.instrument.data["volume"],
             offset=offset,
+        )
+
+    def finbrain_technical_report(self) -> str:
+        return finbrain.technical_report(
+            ticker=self.instrument.ticker,
         )

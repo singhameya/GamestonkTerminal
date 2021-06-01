@@ -36,7 +36,7 @@ class TechnicalAnalysisController:
         "q",
         "quit",
         "view",
-        "summary",
+        "tr",
         "recom",
         "pr",
         "ema",
@@ -91,7 +91,7 @@ class TechnicalAnalysisController:
         print("   quit        quit to abandon program")
         print("")
         print("   view        view historical data and trendlines [Finviz]")
-        print("   summary     technical summary report [FinBrain API]")
+        print("   tr          technical report [FinBrain API]")
         print(
             "   recom       recommendation based on Technical Indicators [Tradingview API]"
         )
@@ -171,9 +171,29 @@ class TechnicalAnalysisController:
         except Exception as e:
             print(e, "\n")
 
-    def call_summary(self, other_args: List[str]):
-        """Process summary command"""
-        finbrain_view.technical_summary_report(other_args, self.ticker)
+    def call_tr(self, other_args: List[str]):
+        """Process technical report command"""
+        parser = argparse.ArgumentParser(
+            add_help=False,
+            prog="tr",
+            description="""
+                Technical report provided by FinBrain's API.
+                FinBrain Technologies develops deep learning algorithms for financial analysis
+                and prediction, which currently serves traders from more than 150 countries
+                all around the world. [Source:  https://finbrain.tech]
+            """,
+        )
+
+        try:
+            ns_parser = parse_known_args_and_warn(parser, other_args)
+            if not ns_parser:
+                return
+
+            report = finbrain_view.technical_report(self.gst)
+            print(report.replace(". ", ".\n"))
+
+        except Exception as e:
+            print(e, "\n")
 
     def call_recom(self, other_args: List[str]):
         """Process recom command"""
