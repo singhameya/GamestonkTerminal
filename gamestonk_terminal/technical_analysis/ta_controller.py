@@ -197,7 +197,61 @@ class TechnicalAnalysisController:
 
     def call_recom(self, other_args: List[str]):
         """Process recom command"""
-        tradingview_view.print_recommendation(other_args, self.ticker)
+        parser = argparse.ArgumentParser(
+            add_help=False,
+            prog="recom",
+            description="""
+                Print tradingview recommendation based on technical indicators.
+                [Source: https://pypi.org/project/tradingview-ta/]
+            """,
+        )
+        parser.add_argument(
+            "-s",
+            "--screener",
+            action="store",
+            dest="screener",
+            type=str,
+            default="america",
+            choices=["crypto", "forex", "cfd"],
+            help="Screener. See https://python-tradingview-ta.readthedocs.io/en/latest/usage.html",
+        )
+        parser.add_argument(
+            "-e",
+            "--exchange",
+            action="store",
+            dest="exchange",
+            type=str,
+            default="",
+            help="""Set exchange. For Forex use: 'FX_IDC', and for crypto use 'TVC'.
+            See https://python-tradingview-ta.readthedocs.io/en/latest/usage.html.
+            By default Alpha Vantage tries to get this data from the ticker. """,
+        )
+        parser.add_argument(
+            "-i",
+            "--interval",
+            action="store",
+            dest="interval",
+            type=str,
+            default="",
+            choices=["1M", "1W", "1d", "4h", "1h", "15m", "5m", "1m"],
+            help="""Interval, that corresponds to the recommendation given by tradingview based on technical indicators.
+            See https://python-tradingview-ta.readthedocs.io/en/latest/usage.html""",
+        )
+
+        try:
+            ns_parser = parse_known_args_and_warn(parser, other_args)
+            if not ns_parser:
+                return
+
+            recom = tradingview_view.print_recommendation(
+                self.gst, ns_parser.screener, ns_parser.exchange, ns_parser.interval
+            )
+
+            print(recom)
+            print("")
+
+        except Exception as e:
+            print(e, "\n")
 
     def call_pr(self, other_args: List[str]):
         """Process pr command"""

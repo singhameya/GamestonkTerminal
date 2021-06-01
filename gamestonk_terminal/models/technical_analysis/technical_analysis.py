@@ -3,6 +3,7 @@ import pandas as pd
 
 # IMPORTATION INTERNAL
 from gamestonk_terminal.models.instrument import Instrument
+from gamestonk_terminal import config_terminal as cfg
 from gamestonk_terminal.models.technical_analysis import (
     overlap,
     momentum,
@@ -10,6 +11,7 @@ from gamestonk_terminal.models.technical_analysis import (
     volatility,
     volume,
     finbrain,
+    tradingview,
 )
 
 
@@ -139,4 +141,15 @@ class TechnicalAnalysis:
     def finbrain_technical_report(self) -> str:
         return finbrain.technical_report(
             ticker=self.instrument.ticker,
+        )
+
+    def tradingview_recommendation(
+        self, screener: str, exchange: str, interval: str
+    ) -> str:
+        return tradingview.recommendation(
+            API_KEY_ALPHAVANTAGE=cfg.API_KEY_ALPHAVANTAGE,
+            ticker=self.instrument.ticker,
+            screener=screener,
+            exchange=exchange,
+            interval=interval,
         )
