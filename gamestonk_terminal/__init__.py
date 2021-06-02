@@ -6,3 +6,5 @@ from . import papermill
 from . import prediction_techniques
 from . import behavioural_analysis
 from . import technical_analysis
+# TODO: Evaluate if the above imports are required by the CLI terminal
+from . import models
