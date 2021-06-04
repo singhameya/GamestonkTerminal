@@ -1,6 +1,8 @@
 """Technical Analysis Controller Module"""
 __docformat__ = "numpy"
 
+# pylint: disable=C0302
+
 import argparse
 from typing import List
 from datetime import datetime
