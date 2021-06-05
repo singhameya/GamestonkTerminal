@@ -1,15 +1,12 @@
 import argparse
 from sys import stdout
 import random
-from datetime import datetime, timedelta
+from datetime import datetime
 import subprocess
 import hashlib
 import matplotlib.pyplot as plt
 import pandas as pd
-from alpha_vantage.timeseries import TimeSeries
 import mplfinance as mpf
-import yfinance as yf
-import pytz
 
 from gamestonk_terminal.helper_funcs import (
     valid_date,
@@ -21,7 +18,6 @@ from gamestonk_terminal.helper_funcs import (
     plot_autoscale,
 )
 
-from gamestonk_terminal import config_terminal as cfg
 from gamestonk_terminal import feature_flags as gtff
 from gamestonk_terminal.technical_analysis import trendline_api as trend
 from gamestonk_terminal.models import gamestonk_terminal
@@ -132,7 +128,7 @@ def clear(l_args, s_ticker, s_start, s_interval, df_stock):
         return s_ticker, s_start, s_interval, df_stock
 
 
-def load(l_args, s_ticker, s_start, s_interval, df_stock):
+def load(l_args, gst: gamestonk_terminal.GamestonkTerminal):
     parser = argparse.ArgumentParser(
         add_help=False,
         prog="load",
@@ -191,170 +187,36 @@ def load(l_args, s_ticker, s_start, s_interval, df_stock):
 
         ns_parser = parse_known_args_and_warn(parser, l_args)
         if not ns_parser:
-            return [s_ticker, s_start, s_interval, df_stock]
+            return gst
 
-        # Daily
-        if ns_parser.n_interval == 1440:
+        # Instantiate and Load GST object with relevant information
+        gst.update_instrument(
+            context="stock",
+            ticker=ns_parser.s_ticker.upper(),
+            source=ns_parser.source,
+            interval=ns_parser.n_interval,
+            prepost=ns_parser.b_prepost,
+            start=ns_parser.s_start_date,
+        )
 
-            # Alpha Vantage Source
-            if ns_parser.source == "av":
-                ts = TimeSeries(key=cfg.API_KEY_ALPHAVANTAGE, output_format="pandas")
-                # pylint: disable=unbalanced-tuple-unpacking
-                df_stock_candidate, _ = ts.get_daily_adjusted(
-                    symbol=ns_parser.s_ticker, outputsize="full"
-                )
-
-                # Check that loading a stock was not successful
-                if df_stock_candidate.empty:
-                    print("")
-                    return [s_ticker, s_start, s_interval, df_stock]
-
-                # pylint: disable=no-member
-                df_stock_candidate.sort_index(ascending=True, inplace=True)
-
-                # Slice dataframe from the starting date YYYY-MM-DD selected
-                df_stock_candidate = df_stock_candidate[ns_parser.s_start_date :]
-
-            # Yahoo Finance Source
-            elif ns_parser.source == "yf":
-                df_stock_candidate = yf.download(
-                    ns_parser.s_ticker, start=ns_parser.s_start_date, progress=False
-                )
-
-                # Check that loading a stock was not successful
-                if df_stock_candidate.empty:
-                    print("")
-                    return [s_ticker, s_start, s_interval, df_stock]
-
-                df_stock_candidate = df_stock_candidate.rename(
-                    columns={
-                        "Open": "1. open",
-                        "High": "2. high",
-                        "Low": "3. low",
-                        "Close": "4. close",
-                        "Adj Close": "5. adjusted close",
-                        "Volume": "6. volume",
-                    }
-                )
-                df_stock_candidate.index.name = "date"
-
-            # Check if start time from dataframe is more recent than specified
-            if df_stock_candidate.index[0] > pd.to_datetime(ns_parser.s_start_date):
-                s_start = df_stock_candidate.index[0]
-            else:
-                s_start = ns_parser.s_start_date
-
-        # Intraday
-        else:
-
-            # Alpha Vantage Source
-            if ns_parser.source == "av":
-                ts = TimeSeries(key=cfg.API_KEY_ALPHAVANTAGE, output_format="pandas")
-                # pylint: disable=unbalanced-tuple-unpacking
-                df_stock_candidate, _ = ts.get_intraday(
-                    symbol=ns_parser.s_ticker,
-                    outputsize="full",
-                    interval=str(ns_parser.n_interval) + "min",
-                )
-
-                # Check that loading a stock was not successful
-                if df_stock_candidate.empty:
-                    print("")
-                    return [s_ticker, s_start, s_interval, df_stock]
-
-                # pylint: disable=no-member
-                df_stock_candidate.sort_index(ascending=True, inplace=True)
-
-                # Slice dataframe from the starting date YYYY-MM-DD selected
-                df_stock_candidate = df_stock_candidate[ns_parser.s_start_date :]
-
-                # Check if start time from dataframe is more recent than specified
-                if df_stock_candidate.index[0] > pd.to_datetime(ns_parser.s_start_date):
-                    s_start = df_stock_candidate.index[0]
-                else:
-                    s_start = ns_parser.s_start_date
-
-            # Yahoo Finance Source
-            elif ns_parser.source == "yf":
-                s_int = str(ns_parser.n_interval) + "m"
-
-                d_granularity = {"1m": 6, "5m": 59, "15m": 59, "30m": 59, "60m": 729}
-
-                s_start_dt = datetime.utcnow() - timedelta(days=d_granularity[s_int])
-                s_date_start = s_start_dt.strftime("%Y-%m-%d")
-
-                if s_start_dt > ns_parser.s_start_date:
-                    # Using Yahoo Finance with granularity {s_int} the starting date is set to: {s_date_start}
-
-                    df_stock_candidate = yf.download(
-                        ns_parser.s_ticker,
-                        start=s_date_start,
-                        progress=False,
-                        interval=s_int,
-                        prepost=ns_parser.b_prepost,
-                    )
-
-                else:
-                    df_stock_candidate = yf.download(
-                        ns_parser.s_ticker,
-                        start=ns_parser.s_start_date.strftime("%Y-%m-%d"),
-                        progress=False,
-                        interval=s_int,
-                        prepost=ns_parser.b_prepost,
-                    )
-
-                # Check that loading a stock was not successful
-                if df_stock_candidate.empty:
-                    print("")
-                    return [s_ticker, s_start, s_interval, df_stock]
-
-                if s_start_dt > ns_parser.s_start_date:
-                    s_start = pytz.utc.localize(s_start_dt)
-                else:
-                    s_start = ns_parser.s_start_date
-
-                df_stock_candidate = df_stock_candidate.rename(
-                    columns={
-                        "Open": "1. open",
-                        "High": "2. high",
-                        "Low": "3. low",
-                        "Close": "4. close",
-                        "Adj Close": "5. adjusted close",
-                        "Volume": "6. volume",
-                    }
-                )
-                df_stock_candidate.index.name = "date"
-
-        s_intraday = (f"Intraday {s_interval}", "Daily")[ns_parser.n_interval == 1440]
+        s_intraday = (f"Intraday {str(ns_parser.n_interval) + 'm'}", "Daily")[
+            ns_parser.n_interval == 1440
+        ]
 
         print(
             f"Loading {s_intraday} {ns_parser.s_ticker.upper()} stock "
-            f"with starting period {s_start.strftime('%Y-%m-%d')} for analysis.\n"
+            f"with starting period {ns_parser.s_start_date.strftime('%Y-%m-%d')} for analysis.\n"
         )
 
-        # Instantiate and Load GST object with relevant information
-        gst = gamestonk_terminal.GamestonkTerminal(
-            context="stock",
-            ticker=ns_parser.s_ticker.upper(),
-            data=df_stock_candidate,
-            interval=str(ns_parser.n_interval) + "min",
-        )
-
-        return [
-            ns_parser.s_ticker.upper(),
-            s_start,
-            str(ns_parser.n_interval) + "min",
-            df_stock_candidate,
-            gst,
-        ]
+        return gst
 
     except Exception as e:
         print(e, "\nEither the ticker or the API_KEY are invalids. Try again!\n")
-        return [s_ticker, s_start, s_interval, df_stock]
+        return gst
 
     except SystemExit:
         print("")
-        return [s_ticker, s_start, s_interval, df_stock]
+        return gst
 
 
 def candle(s_ticker: str, s_start: str):

@@ -5,8 +5,6 @@ __docformat__ = "numpy"
 
 import argparse
 from typing import List
-from datetime import datetime
-import pandas as pd
 import matplotlib.pyplot as plt
 from prompt_toolkit.completion import NestedCompleter
 
@@ -57,17 +55,9 @@ class TechnicalAnalysisController:
 
     def __init__(
         self,
-        stock: pd.DataFrame,
-        ticker: str,
-        start: datetime,
-        interval: str,
         gst,
     ):
         """Constructor"""
-        self.stock = stock
-        self.ticker = ticker
-        self.start = start
-        self.interval = interval
         self.gst = gst
         self.ta_parser = argparse.ArgumentParser(add_help=False, prog="ta")
         self.ta_parser.add_argument(
@@ -78,14 +68,16 @@ class TechnicalAnalysisController:
     def print_help(self):
         """Print help"""
 
-        s_intraday = (f"Intraday {self.interval }", "Daily")[self.interval == "1440min"]
+        s_intraday = (f"Intraday {str(self.gst.instrument.interval) + 'm'}", "Daily")[
+            self.gst.instrument.interval == 1440
+        ]
 
-        if self.start:
+        if self.gst.instrument.start:
             print(
-                f"\n{s_intraday} Stock: {self.ticker} (from {self.start.strftime('%Y-%m-%d')})"
+                f"\n{str(self.gst.instrument.interval) + 'm'} Stock: {self.gst.instrument.ticker} (from {self.gst.instrument.start.strftime('%Y-%m-%d')})"
             )
         else:
-            print(f"\n{s_intraday} Stock: {self.ticker}")
+            print(f"\n{s_intraday} Stock: {self.gst.instrument.ticker}")
 
         print("\nTechnical Analysis:")  # https://github.com/twopirllc/pandas-ta
         print("   help        show this technical analysis menu again")
@@ -1015,10 +1007,10 @@ class TechnicalAnalysisController:
             print(e, "\n")
 
 
-def menu(stock: pd.DataFrame, ticker: str, start: datetime, interval: str, gst=None):
+def menu(gst=None):
     """Technical Analysis Menu"""
 
-    ta_controller = TechnicalAnalysisController(stock, ticker, start, interval, gst)
+    ta_controller = TechnicalAnalysisController(gst)
     ta_controller.call_help(None)
 
     while True:

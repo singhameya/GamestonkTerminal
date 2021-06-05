@@ -48,6 +48,7 @@ from gamestonk_terminal.resource_collection import rc_controller
 from gamestonk_terminal.research import res_controller
 from gamestonk_terminal.government import gov_controller
 from gamestonk_terminal.etf import etf_controller
+from gamestonk_terminal.models import gamestonk_terminal
 
 
 # pylint: disable=too-many-statements,too-many-branches
@@ -137,6 +138,8 @@ def main():
             print(e)
         print("")
 
+    gst = gamestonk_terminal.GamestonkTerminal()
+
     # Loop forever and ever
     while True:
 
@@ -192,9 +195,7 @@ def main():
             main_cmd = True
 
         elif ns_known_args.opt == "load":
-            s_ticker, s_start, s_interval, df_stock, gst = load(
-                l_args, s_ticker, s_start, s_interval, df_stock
-            )
+            gst = load(l_args, gst)
             main_cmd = True
 
         elif ns_known_args.opt == "candle":
@@ -273,14 +274,8 @@ def main():
             b_quit = fx_controller.menu()
 
         elif ns_known_args.opt == "ta":
-            if s_ticker:
-                b_quit = ta_controller.menu(
-                    df_stock,
-                    s_ticker.split(".")[0] if "." in s_ticker else s_ticker,
-                    s_start,
-                    s_interval,
-                    gst,
-                )
+            if gst.instrument.ticker:
+                b_quit = ta_controller.menu(gst)
             else:
                 print("Please load a ticker using <load TICKER>")
                 print("")
