@@ -172,7 +172,7 @@ class PortfolioController:
 
     def call_degiro(self, _):
         """ "Process degiro command."""
-
+        print("Degiro menu has been temporarily disabled", "\n")
         return degiro_controller.menu()
 
     def call_hold(self, _):

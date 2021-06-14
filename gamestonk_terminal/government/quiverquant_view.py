@@ -1,6 +1,8 @@
 import argparse
 from typing import List
 from datetime import datetime, timedelta
+import numpy as np
+from sklearn import linear_model
 import pandas as pd
 from matplotlib import pyplot as plt
 import matplotlib.dates as mdates
@@ -12,6 +14,8 @@ from gamestonk_terminal.helper_funcs import (
 )
 from gamestonk_terminal.config_plot import PLOT_DPI
 from gamestonk_terminal import feature_flags as gtff
+
+# pylint: disable=C0302
 
 
 def last_government(other_args: List[str], gov_type: str):
@@ -757,6 +761,295 @@ def contracts(other_args: List[str], ticker: str):
             plt.ion()
 
         plt.show()
+        print("")
+
+    except Exception as e:
+        print(e, "\n")
+
+
+def qtr_contracts(other_args: List[str]):
+    """Quarter contracts
+
+    Parameters
+    ----------
+    other_args : List[str]
+        Command line arguments to be processed with argparse
+    """
+    parser = argparse.ArgumentParser(
+        add_help=False,
+        prog="qtr_contracts",
+        description="Quarterly-contracts, best regression slope. [Source: www.quiverquant.com]",
+    )
+    parser.add_argument(
+        "-t",
+        "--top",
+        action="store",
+        dest="top",
+        type=check_positive,
+        default=5,
+        help="Top promising stocks with best quarterly-contracts momentum",
+    )
+
+    try:
+        ns_parser = parse_known_args_and_warn(parser, other_args)
+        if not ns_parser:
+            return
+
+        df_contracts = quiverquant_model.get_government_trading("quarter-contracts")
+
+        if df_contracts.empty:
+            print("No quarterly government contracts found\n")
+            return
+
+        df_coef = pd.DataFrame(columns=["Ticker", "Coef"])
+
+        for symbol in df_contracts["Ticker"].unique():
+            # Create linear regression object
+            regr = linear_model.LinearRegression()
+
+            amounts = (
+                df_contracts[df_contracts["Ticker"] == symbol]
+                .sort_values(by=["Year", "Qtr"])["Amount"]
+                .values
+            )
+
+            # Train the model using the training sets
+            regr.fit(np.arange(0, len(amounts)).reshape(-1, 1), amounts)
+
+            df_coef = df_coef.append(
+                {"Ticker": symbol, "Coef": regr.coef_[0]}, ignore_index=True
+            )
+
+        plt.figure(figsize=plot_autoscale(), dpi=PLOT_DPI)
+
+        tickers = df_coef.sort_values(by=["Coef"], ascending=False).head(ns_parser.top)[
+            "Ticker"
+        ]
+
+        max_amount = 0
+        quarter_ticks = list()
+        for symbol in tickers:
+            amounts = (
+                df_contracts[df_contracts["Ticker"] == symbol]
+                .sort_values(by=["Year", "Qtr"])["Amount"]
+                .values
+            )
+
+            qtr = (
+                df_contracts[df_contracts["Ticker"] == symbol]
+                .sort_values(by=["Year", "Qtr"])["Qtr"]
+                .values
+            )
+            year = (
+                df_contracts[df_contracts["Ticker"] == symbol]
+                .sort_values(by=["Year", "Qtr"])["Year"]
+                .values
+            )
+
+            plt.plot(np.arange(0, len(amounts)), amounts / 1000, "-*", lw=2, ms=15)
+
+            if len(amounts) > max_amount:
+                max_amount = len(amounts)
+                quarter_ticks = [
+                    f"{quarter[0]} - {quarter[1]} Qtr" for quarter in zip(year, qtr)
+                ]
+
+        plt.xlim([-0.5, max_amount - 0.5])
+        plt.xticks(np.arange(0, max_amount), quarter_ticks)
+        plt.grid()
+        plt.legend(tickers)
+        plt.title("Quarterly Government Contracts - Top promising stocks")
+        plt.xlabel("Date")
+        plt.ylabel("Amount [1k $]")
+
+        if gtff.USE_ION:
+            plt.ion()
+
+        plt.show()
+        print("")
+
+    except Exception as e:
+        print(e, "\n")
+
+
+def qtr_contracts_hist(other_args: List[str], ticker: str):
+    """Quarter contracts
+
+    Parameters
+    ----------
+    other_args : List[str]
+        Command line arguments to be processed with argparse
+    ticker: str
+        Ticker to get congress trading data from
+    """
+    parser = argparse.ArgumentParser(
+        add_help=False,
+        prog="qtr_contracts_hist",
+        description="Quarterly-contracts historical [Source: www.quiverquant.com]",
+    )
+    try:
+        ns_parser = parse_known_args_and_warn(parser, other_args)
+        if not ns_parser:
+            return
+
+        df_contracts = quiverquant_model.get_government_trading(
+            "quarter-contracts", ticker=ticker
+        )
+
+        if df_contracts.empty:
+            print("No quarterly government contracts found\n")
+            return
+
+        plt.figure(figsize=plot_autoscale(), dpi=PLOT_DPI)
+
+        amounts = df_contracts.sort_values(by=["Year", "Qtr"])["Amount"].values
+
+        qtr = df_contracts.sort_values(by=["Year", "Qtr"])["Qtr"].values
+        year = df_contracts.sort_values(by=["Year", "Qtr"])["Year"].values
+
+        quarter_ticks = [
+            f"{quarter[0]}" if quarter[1] == 1 else "" for quarter in zip(year, qtr)
+        ]
+
+        plt.plot(np.arange(0, len(amounts)), amounts / 1000, "-*", lw=2, ms=15)
+
+        plt.xlim([-0.5, len(amounts) - 0.5])
+        plt.xticks(np.arange(0, len(amounts)), quarter_ticks)
+        plt.grid()
+        plt.title(f"Quarterly Government Contracts Historical on {ticker.upper()}")
+        plt.xlabel("Date")
+        plt.ylabel("Amount [1k $]")
+
+        if gtff.USE_ION:
+            plt.ion()
+
+        plt.show()
+        print("")
+
+    except Exception as e:
+        print(e, "\n")
+
+
+def top_lobbying(other_args: List[str]):
+    """Top lobbying based on tickers that have biggest amounts for the past couple months
+
+    Parameters
+    ----------
+    other_args : List[str]
+        Command line arguments to be processed with argparse
+    """
+    parser = argparse.ArgumentParser(
+        add_help=False,
+        prog="top_lobbying",
+        description="Top lobbying. [Source: www.quiverquant.com]",
+    )
+    parser.add_argument(
+        "-t",
+        "--top",
+        action="store",
+        dest="top",
+        type=check_positive,
+        default=10,
+        help="Top corporate lobbying tickers with biggest amounts",
+    )
+
+    try:
+        ns_parser = parse_known_args_and_warn(parser, other_args)
+        if not ns_parser:
+            return
+
+        df_lobbying = quiverquant_model.get_government_trading("corporate-lobbying")
+
+        if df_lobbying.empty:
+            print("No corporate lobbying found\n")
+            return
+
+        d_lobbying = {}
+        for symbol in df_lobbying["Ticker"].unique():
+            d_lobbying[symbol] = sum(
+                float(amount)
+                for amount in df_lobbying[df_lobbying["Ticker"] == symbol]
+                .replace(np.nan, 0)["Amount"]
+                .values
+            )
+
+        df_amount = pd.DataFrame.from_dict(
+            d_lobbying, orient="index", columns=["Amount"]
+        ).sort_values(by=["Amount"], ascending=False)
+
+        plt.figure(figsize=plot_autoscale(), dpi=PLOT_DPI)
+
+        plt.bar(
+            df_amount.head(ns_parser.top).index,
+            df_amount.head(ns_parser.top).values.flatten() / 1000,
+        )
+        plt.xlabel("Ticker")
+        plt.ylabel("Sum Amount [1k $]")
+        plt.title(
+            f"Total amount spent on corporate lobbying since {df_lobbying['Date'].min()}"
+        )
+
+        if gtff.USE_ION:
+            plt.ion()
+
+        plt.show()
+        print("")
+
+    except Exception as e:
+        print(e, "\n")
+
+
+def lobbying(other_args: List[str], ticker: str):
+    """Corporate lobbying details
+
+    Parameters
+    ----------
+    other_args : List[str]
+        Command line arguments to be processed with argparse
+    ticker: str
+        Ticker to get corporate lobbying data from
+    """
+    parser = argparse.ArgumentParser(
+        add_help=False,
+        prog="lobbying",
+        description="Lobbying details [Source: www.quiverquant.com]",
+    )
+    parser.add_argument(
+        "-l",
+        "--last",
+        action="store",
+        dest="last",
+        type=check_positive,
+        default=10,
+        help="Last corporate lobbying details",
+    )
+    try:
+        ns_parser = parse_known_args_and_warn(parser, other_args)
+        if not ns_parser:
+            return
+
+        df_lobbying = quiverquant_model.get_government_trading(
+            "corporate-lobbying", ticker=ticker
+        )
+
+        if df_lobbying.empty:
+            print("No corporate lobbying found\n")
+            return
+
+        for _, row in (
+            df_lobbying.sort_values(by=["Date"], ascending=False)
+            .head(ns_parser.last)
+            .iterrows()
+        ):
+            amount = (
+                "$" + str(int(float(row["Amount"])))
+                if row["Amount"] is not None
+                else "N/A"
+            )
+            print(f"{row['Date']}: {row['Client']} {amount}")
+            if row["Amount"] is not None:
+                print("\t" + row["Specific_Issue"].replace("\n", " ").replace("\r", ""))
+            print("")
         print("")
 
     except Exception as e:

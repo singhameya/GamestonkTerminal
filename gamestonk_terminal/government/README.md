@@ -25,6 +25,10 @@ This data has been provided by [quiverquant](https://www.quiverquant.com).
   * last government contracts
 * [sum_contracts](#sum_contracts)
   * plot sum of last government contracts
+* [qtr_contracts](#qtr_contracts)
+  * quarterly government contracts best regression  
+* [top_lobbying](#top_lobbying)
+  * top corporate lobbying tickers  
 
 #### WITH TICKER PROVIDED
 
@@ -44,6 +48,10 @@ This data has been provided by [quiverquant](https://www.quiverquant.com).
   * raw contracts on the ticker
 * [contracts](#contracts)
   * plot sum of contracts on the ticker
+* [qtr_contracts_hist](#qtr_contracts_hist)
+  * quarterly government contracts historical
+* [lobbying](#lobbying)
+  * corporate lobbying details
 
 ## last_congress <a name="last_congress"></a>
 ```text
@@ -174,6 +182,26 @@ Sum latest contracts. [Source: www.quiverquant.com]
 ![sum_contracts](https://user-images.githubusercontent.com/25267873/119065220-f33d0580-b9d4-11eb-8870-37ca352b187c.png)
 
 
+## qtr_contracts <a name="qtr_contracts"></a>
+```text
+usage: qtr_contracts [-t TOP]
+```
+Quarterly government contracts best regression. [Source: www.quiverquant.com]
+
+![top_promising_stocks](https://user-images.githubusercontent.com/25267873/120394857-f963a800-c32b-11eb-9d3f-2295f7216b67.png)
+
+
+## top_lobbying <a name="top_lobbying"></a>
+```text
+usage: top_lobbying [-t TOP]
+```
+Top lobbying spent. [Source: www.quiverquant.com]
+
+* -t : Top corporate lobbying tickers with biggest amounts. Default 10.
+
+![top_lobbying](https://user-images.githubusercontent.com/25267873/120707733-9e0ff200-c4b2-11eb-9430-552d92f3fc74.png)
+
+
 #### WITH TICKER PROVIDED 
 
 ## raw_congress <a name="raw_congress"></a>
@@ -262,3 +290,24 @@ Contracts associated with ticker. [Source: www.quiverquant.com]
 * -p : Past transaction months. Default: 10.
 
 ![contracts](https://user-images.githubusercontent.com/25267873/119065405-59c22380-b9d5-11eb-9a34-9cad288b22de.png)
+
+
+## qtr_contracts_hist <a name="qtr_contracts_hist"></a>
+```text
+usage: qtr_contracts_hist
+```
+Quarterly government contracts historical. [Source: www.quiverquant.com]
+
+![qtr_contracts_hist](https://user-images.githubusercontent.com/25267873/120394929-113b2c00-c32c-11eb-8241-78d5d1328386.png)
+
+
+## lobbying <a name="lobbying"></a>
+```text
+usage: lobbying [-l LAST]
+```
+Lobbying details. [Source: www.quiverquant.com]
+
+* -l : Last corporate lobbying details. Default: 10.
+
+<img width="1222" alt="Captura de ecrã 2021-06-03, às 21 25 02" src="https://user-images.githubusercontent.com/25267873/120707931-d1528100-c4b2-11eb-9619-82c896aaa9e7.png">
+

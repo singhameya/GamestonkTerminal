@@ -58,6 +58,12 @@ view -t S_TICKER [-s S_START_DATE] [-i {1,5,15,30,60}] [--type N_TYPE]
 ![GNUS](https://user-images.githubusercontent.com/25267873/108925137-f2920e80-7633-11eb-8274-6e3bb6a19592.png)
 
 ```
+quote -t S_TICKER
+```
+
+* Show the current price of a stock.
+
+```
 candle
 ```
 
@@ -97,6 +103,9 @@ Command|Description|Source
 `trending`      |trending news |[Seeking Alpha](https://seekingalpha.com/)
 `ratings`      |top ratings updates |[MarketBeat](https://marketbeat.com)
 `darkpool`      |dark pool tickers with growing activity |[FINRA](https://www.finra.org)
+`topdark`       |largest dark pool positions | [Stockgrid](https://stockgrid.io)
+`darkshort`     | dark pool short information|[Stockgrid](https://stockgrid.io)
+`shortvol`      |short interest              |[Stockgrid](https://stockgrid.io)
 
 &nbsp;
 
@@ -236,6 +245,7 @@ Command|Description|Source
 `warnings`      |company warnings according to Sean Seah book |[MarketWatch](https://www.marketwatch.com/)
 `dp`            |dark pools (ATS) vs OTC data [FINRA](https://www.finra.org/#/)
 `ftd`           |display fails-to-deliver data [SEC](https://www.sec.gov)
+`shortview`     |shows price vs short interest over last year [Stockgrid](https://stockgrid.io
 
 &nbsp;
 
@@ -463,7 +473,7 @@ Command|Website
 `sell_house`            | plot top sell house tickers
 `last_contracts`        | last government contracts
 `sum_contracts`         | plot sum of last government contracts
-with ticker provided    | 
+with ticker provided    |
 `raw_congress`          | raw congress trades on the ticker
 `congress`              | plot congress trades on the ticker
 `raw_senate`            | raw senate trades on the ticker

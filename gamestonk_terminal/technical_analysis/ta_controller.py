@@ -73,8 +73,9 @@ class TechnicalAnalysisController:
         ]
 
         if self.gst.instrument.start:
+            s_startdate = f"(from {self.gst.instrument.start.strftime('%Y-%m-%d')})"
             print(
-                f"\n{str(self.gst.instrument.interval) + 'm'} Stock: {self.gst.instrument.ticker} (from {self.gst.instrument.start.strftime('%Y-%m-%d')})"
+                f"\n{str(self.gst.instrument.interval) + 'm'} Stock: {self.gst.instrument.ticker} {s_startdate}"
             )
         else:
             print(f"\n{s_intraday} Stock: {self.gst.instrument.ticker}")

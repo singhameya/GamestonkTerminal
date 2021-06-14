@@ -27,6 +27,7 @@ from gamestonk_terminal.main_helper import (
     view,
     candle,
     print_goodbye,
+    quote,
     update_terminal,
 )
 from gamestonk_terminal.menu import session
@@ -38,6 +39,7 @@ from gamestonk_terminal.exploratory_data_analysis import eda_controller
 from gamestonk_terminal.options import op_controller
 from gamestonk_terminal.econ import econ_controller
 from gamestonk_terminal.residuals_analysis import ra_controller
+
 from gamestonk_terminal.portfolio import port_controller
 from gamestonk_terminal.cryptocurrency import crypto_controller
 from gamestonk_terminal.screener import screener_controller
@@ -86,6 +88,7 @@ def main():
         "update",
         "clear",
         "load",
+        "quote",
         "candle",
         "view",
         "export",
@@ -196,6 +199,10 @@ def main():
 
         elif ns_known_args.opt == "load":
             gst = load(l_args, gst)
+            main_cmd = True
+
+        elif ns_known_args.opt == "quote":
+            quote(l_args, s_ticker)
             main_cmd = True
 
         elif ns_known_args.opt == "candle":

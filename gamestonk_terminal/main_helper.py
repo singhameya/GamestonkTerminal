@@ -1,12 +1,18 @@
+"""Main helper"""
+__docformat__ = "numpy"
 import argparse
+from typing import List
 from sys import stdout
 import random
 from datetime import datetime
 import subprocess
 import hashlib
 import matplotlib.pyplot as plt
+from numpy.core.fromnumeric import transpose
 import pandas as pd
 import mplfinance as mpf
+import yfinance as yf
+from tabulate import tabulate
 
 from gamestonk_terminal.helper_funcs import (
     valid_date,
@@ -33,6 +39,7 @@ def print_help(s_ticker, s_start, s_interval, b_is_market_open):
     print("")
     print("   clear       clear a specific stock ticker from analysis")
     print("   load        load a specific stock ticker for analysis")
+    print("   quote       view the current price for a specific stock ticker")
     print("   candle      view a candle chart for a specific stock ticker")
     print("   view        view and load a specific stock ticker for technical analysis")
     if s_ticker:
@@ -108,7 +115,8 @@ def print_help(s_ticker, s_start, s_interval, b_is_market_open):
     print("")
 
 
-def clear(l_args, s_ticker, s_start, s_interval, df_stock):
+def clear(other_args: List[str], s_ticker, s_start, s_interval, df_stock):
+    """Clears loaded stock and returns empty variables"""
     parser = argparse.ArgumentParser(
         add_help=False,
         prog="clear",
@@ -116,7 +124,7 @@ def clear(l_args, s_ticker, s_start, s_interval, df_stock):
     )
 
     try:
-        ns_parser = parse_known_args_and_warn(parser, l_args)
+        ns_parser = parse_known_args_and_warn(parser, other_args)
         if not ns_parser:
             return "", "", "", pd.DataFrame()
 
@@ -128,7 +136,7 @@ def clear(l_args, s_ticker, s_start, s_interval, df_stock):
         return s_ticker, s_start, s_interval, df_stock
 
 
-def load(l_args, gst: gamestonk_terminal.GamestonkTerminal):
+def load(other_args: List[str], gst: gamestonk_terminal.GamestonkTerminal):
     parser = argparse.ArgumentParser(
         add_help=False,
         prog="load",
@@ -181,11 +189,11 @@ def load(l_args, gst: gamestonk_terminal.GamestonkTerminal):
 
     try:
         # For the case where a user uses: 'load BB'
-        if l_args:
-            if "-" not in l_args[0]:
-                l_args.insert(0, "-t")
+        if other_args:
+            if "-" not in other_args[0]:
+                other_args.insert(0, "-t")
 
-        ns_parser = parse_known_args_and_warn(parser, l_args)
+        ns_parser = parse_known_args_and_warn(parser, other_args)
         if not ns_parser:
             return gst
 
@@ -264,7 +272,119 @@ def candle(s_ticker: str, s_start: str):
     print("")
 
 
-def view(l_args, s_ticker, s_start, s_interval, df_stock):
+def quote(other_args: List[str], s_ticker: str):
+    parser = argparse.ArgumentParser(
+        add_help=False,
+        prog="quote",
+        description="Current quote for stock ticker",
+    )
+
+    if s_ticker:
+        parser.add_argument(
+            "-t",
+            "--ticker",
+            action="store",
+            dest="s_ticker",
+            default=s_ticker,
+            help="Stock ticker",
+        )
+    else:
+        parser.add_argument(
+            "-t",
+            "--ticker",
+            action="store",
+            dest="s_ticker",
+            required=True,
+            help="Stock ticker",
+        )
+
+    try:
+        # For the case where a user uses: 'quote BB'
+        if other_args:
+            if "-" not in other_args[0]:
+                other_args.insert(0, "-t")
+        ns_parser = parse_known_args_and_warn(parser, other_args)
+        if not ns_parser:
+            return
+
+    except SystemExit:
+        print("")
+        return
+
+    ticker = yf.Ticker(ns_parser.s_ticker)
+
+    try:
+        quote_df = pd.DataFrame(
+            [
+                {
+                    "Symbol": ticker.info["symbol"],
+                    "Name": ticker.info["shortName"],
+                    "Price": ticker.info["regularMarketPrice"],
+                    "Open": ticker.info["regularMarketOpen"],
+                    "High": ticker.info["dayHigh"],
+                    "Low": ticker.info["dayLow"],
+                    "Previous Close": ticker.info["previousClose"],
+                    "Volume": ticker.info["volume"],
+                    "52 Week High": ticker.info["fiftyTwoWeekHigh"],
+                    "52 Week Low": ticker.info["fiftyTwoWeekLow"],
+                }
+            ]
+        )
+
+        quote_df["Change"] = quote_df["Price"] - quote_df["Previous Close"]
+        quote_df["Change %"] = quote_df.apply(
+            lambda x: "{:.2f}%".format((x["Change"] / x["Previous Close"]) * 100),
+            axis="columns",
+        )
+        for c in [
+            "Price",
+            "Open",
+            "High",
+            "Low",
+            "Previous Close",
+            "52 Week High",
+            "52 Week Low",
+            "Change",
+        ]:
+            quote_df[c] = quote_df[c].apply(lambda x: f"{x:.2f}")
+        quote_df["Volume"] = quote_df["Volume"].apply(lambda x: f"{x:,}")
+
+        quote_df = quote_df.set_index("Symbol")
+
+        quote_data = transpose(quote_df)
+
+        print(
+            tabulate(
+                quote_data,
+                headers=quote_data.columns,
+                tablefmt="fancy_grid",
+                stralign="right",
+            )
+        )
+    except KeyError:
+        print(f"Invalid stock ticker: {ns_parser.s_ticker}")
+
+    print("")
+    return
+
+
+def view(other_args: List[str], s_ticker: str, s_start, s_interval, df_stock):
+    """
+    Plot loaded ticker or load ticker and plot
+    Parameters
+    ----------
+    other_args:List[str]
+        Argparse arguments
+    s_ticker: str
+        Ticker to load
+    s_start: str
+        Start date
+    s_interval: str
+        Interval tto get data for
+    df_stock: pd.Dataframe
+        Preloaded dataframe to plot
+
+    """
     parser = argparse.ArgumentParser(
         add_help=False,
         prog="view",
@@ -319,7 +439,7 @@ def view(l_args, s_ticker, s_start, s_interval, df_stock):
     )
 
     try:
-        ns_parser = parse_known_args_and_warn(parser, l_args)
+        ns_parser = parse_known_args_and_warn(parser, other_args)
         if not ns_parser:
             return
 
@@ -328,6 +448,7 @@ def view(l_args, s_ticker, s_start, s_interval, df_stock):
         return
 
     # Update values:
+    """
     if ns_parser.s_ticker != s_ticker:
         if ns_parser.n_interval > 0:
             s_ticker, s_start, s_interval, df_stock = load(
@@ -357,6 +478,7 @@ def view(l_args, s_ticker, s_start, s_interval, df_stock):
                 s_interval,
                 df_stock,
             )
+    """
 
     # A new interval intraday period was given
     if ns_parser.n_interval != 0:
@@ -365,9 +487,6 @@ def view(l_args, s_ticker, s_start, s_interval, df_stock):
     type_candles = lett_to_num(ns_parser.type)
 
     df_stock.sort_index(ascending=True, inplace=True)
-
-    # Slice dataframe from the starting date YYYY-MM-DD selected
-    df_stock = df_stock[ns_parser.s_start_date :]
 
     # Daily
     if s_interval == "1440min":
@@ -380,26 +499,27 @@ def view(l_args, s_ticker, s_start, s_interval, df_stock):
             return
         # Append last column of df to be filtered which corresponds to: 6. Volume
         ln_col_idx.append(5)
+        # Slice dataframe from the starting date YYYY-MM-DD selected
+        df_stock = df_stock[ns_parser.s_start_date :]
     # Intraday
     else:
         # The default doesn't exist for intradaily data
+        # JM edit 6-7-21 -- It seems it does
         if ns_parser.type == "a":
-            ln_col_idx = [3]
+            ln_col_idx = [4]
         else:
             ln_col_idx = [int(x) - 1 for x in list(type_candles)]
-        # Check that the types given are not bigger than 3, as there are only 4 types (0-3)
-        # pylint: disable=len-as-condition
-        if len([i for i in ln_col_idx if i > 3]) > 0:
-            print("An index bigger than 3 was given, which is wrong. Try again")
-            return
+
         # Append last column of df to be filtered which corresponds to: 5. Volume
-        ln_col_idx.append(4)
+        ln_col_idx.append(5)
+        # Slice dataframe from the starting date YYYY-MM-DD selected
+        df_stock = df_stock[ns_parser.s_start_date.strftime("%Y-%m-%d") :]
 
     # Plot view of the stock
-    plot_view_stock(df_stock.iloc[:, ln_col_idx], ns_parser.s_ticker)
+    plot_view_stock(df_stock.iloc[:, ln_col_idx], ns_parser.s_ticker, s_interval)
 
 
-def export(l_args, df_stock):
+def export(other_args: List[str], df_stock):
     parser = argparse.ArgumentParser(
         add_help=False,
         prog="export",
@@ -422,7 +542,7 @@ def export(l_args, df_stock):
         help="Export historical data into following formats: csv, json, excel, clipboard",
     )
     try:
-        ns_parser = parse_known_args_and_warn(parser, l_args)
+        ns_parser = parse_known_args_and_warn(parser, other_args)
         if not ns_parser:
             return
 
