@@ -199,6 +199,10 @@ def main():
 
         elif ns_known_args.opt == "load":
             gst = load(l_args, gst)
+            s_ticker = gst.instrument.ticker
+            s_start = gst.instrument.start
+            s_interval = str(gst.instrument.interval) + "m"
+            df_stock = gst.instrument.data
             main_cmd = True
 
         elif ns_known_args.opt == "quote":
