@@ -26,7 +26,7 @@ import seaborn as sns
 from datetime import datetime
 
 
-client = API(access_token=cfg.OANDA_TOKEN, environment="live")
+client = API(access_token=cfg.OANDA_TOKEN, environment=cfg.OANDA_ENV)
 account = cfg.OANDA_ACCOUNT
 
 

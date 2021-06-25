@@ -50,6 +50,7 @@ DG_TOTP_SECRET = os.getenv("GT_DG_TOTP_SECRET") or None
 # https://developer.oanda.com
 OANDA_ACCOUNT = os.getenv("GT_OANDA_ACCOUNT") or "REPLACE ME"
 OANDA_TOKEN = os.getenv("GT_OANDA_TOKEN") or "REPLACE ME"
+OANDA_ENV = os.getenv("GT_OANDA_ENV") or "live"
 
 # https://tradier.com/products/market-data-api
 TRADIER_TOKEN = os.getenv("GT_API_TRADIER_TOKEN") or "REPLACE_ME"
